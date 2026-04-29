@@ -1,0 +1,8 @@
+### Count employees by department
+GET {{baseUrl}}/api/statistics/employees-by-department
+Accept: application/json
+
+###
+### Count employees by position
+GET {{baseUrl}}/api/statistics/employees-by-position
+Accept: application/json

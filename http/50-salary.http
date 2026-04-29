@@ -1,0 +1,41 @@
+### Get all salaries
+GET {{baseUrl}}/api/salaries
+Accept: application/json
+
+###
+### Create salary
+### Change empId/salaryMonth combination before re-running to avoid unique constraint conflicts.
+POST {{baseUrl}}/api/salaries
+Content-Type: application/json
+Accept: application/json
+
+{
+  "empId": 1,
+  "salaryMonth": "2026-05",
+  "baseSalary": 5000.00,
+  "bonus": 300.00,
+  "deduction": 100.00,
+  "netSalary": 5200.00
+}
+
+###
+### Update salary
+### Replace 1 with the actual salaryId returned by GET/POST.
+PUT {{baseUrl}}/api/salaries/4
+Content-Type: application/json
+Accept: application/json
+
+{
+  "empId": 1,
+  "salaryMonth": "2026-05",
+  "baseSalary": 5200.00,
+  "bonus": 500.00,
+  "deduction": 120.00,
+  "netSalary": 5580.00
+}
+
+###
+### Delete salary
+### Replace 1 with the actual salaryId you want to delete.
+DELETE {{baseUrl}}/api/salaries/4
+Accept: application/json

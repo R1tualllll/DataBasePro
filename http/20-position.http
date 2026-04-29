@@ -1,0 +1,39 @@
+### Get all positions
+GET {{baseUrl}}/api/positions
+Accept: application/json
+
+###
+### Create position
+### Change positionName/positionCode before re-running to avoid unique constraint conflicts.
+POST {{baseUrl}}/api/positions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "positionName": "Test Position",
+  "positionCode": "P003",
+  "level": "Junior",
+  "baseSalary": 6500.00,
+  "description": "test create position"
+}
+
+###
+### Update position
+### Replace 3 with the actual positionId returned by GET/POST.
+PUT {{baseUrl}}/api/positions/3
+Content-Type: application/json
+Accept: application/json
+
+{
+  "positionName": "Test Position Updated",
+  "positionCode": "P003",
+  "level": "Senior",
+  "baseSalary": 7200.00,
+  "description": "test update position"
+}
+
+###
+### Delete position
+### Replace 3 with the actual positionId you want to delete.
+DELETE {{baseUrl}}/api/positions/3
+Accept: application/json

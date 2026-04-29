@@ -1,0 +1,4 @@
+### Database connectivity test
+GET {{baseUrl}}/api/test/db
+Accept: application/json
+

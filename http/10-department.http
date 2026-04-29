@@ -1,0 +1,11 @@
+PUT {{baseUrl}}/api/departments/8
+Content-Type: application/json
+Accept: application/json
+
+{
+  "deptName": "Test Department Updated",
+  "deptCode": "D999",
+  "managerName": "Updated Manager",
+  "phone": "010-8888888",
+  "location": "Updated Building"
+}

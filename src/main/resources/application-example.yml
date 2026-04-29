@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://your-server-ip:26000/employee_mgmt?currentSchema=joe
+    username: your_username
+    password: your_password
+    driver-class-name: org.postgresql.Driver
+
+  sql:
+    init:
+      mode: never
+
+  mvc:
+    static-path-pattern: /**

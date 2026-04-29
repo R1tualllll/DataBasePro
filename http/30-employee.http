@@ -1,0 +1,49 @@
+### Get all employees
+GET {{baseUrl}}/api/employees
+Accept: application/json
+
+###
+### Create employee
+### Change phone/email before re-running to avoid unique constraint conflicts.
+POST {{baseUrl}}/api/employees
+Content-Type: application/json
+Accept: application/json
+
+{
+  "empName": "Test Employee",
+  "gender": "male",
+  "age": 23,
+  "phone": "13800000009",
+  "email": "testemployee@test.com",
+  "hireDate": "2026-04-22",
+  "deptId": 1,
+  "positionId": 1,
+  "status": "active",
+  "leaveDate": null
+}
+
+###
+### Update employee
+### Replace 3 with the actual empId returned by GET/POST.
+PUT {{baseUrl}}/api/employees/3
+Content-Type: application/json
+Accept: application/json
+
+{
+  "empName": "Test Employee Updated",
+  "gender": "male",
+  "age": 24,
+  "phone": "13800000019",
+  "email": "testemployee-updated@test.com",
+  "hireDate": "2026-04-22",
+  "deptId": 1,
+  "positionId": 1,
+  "status": "active",
+  "leaveDate": null
+}
+
+###
+### Delete employee
+### Replace 3 with the actual empId you want to delete.
+DELETE {{baseUrl}}/api/employees/3
+Accept: application/json

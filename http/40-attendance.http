@@ -1,0 +1,41 @@
+### Get all attendance records
+GET {{baseUrl}}/api/attendance
+Accept: application/json
+
+###
+### Create attendance
+### Change empId/attendanceDate combination before re-running to avoid unique constraint conflicts.
+POST {{baseUrl}}/api/attendance
+Content-Type: application/json
+Accept: application/json
+
+{
+  "empId": 1,
+  "attendanceDate": "2026-04-22",
+  "attendanceStatus": "present",
+  "lateMinutes": 0,
+  "overtimeHours": 1.50,
+  "remark": "test create attendance"
+}
+
+###
+### Update attendance
+### Replace 1 with the actual attendanceId returned by GET/POST.
+PUT {{baseUrl}}/api/attendance/6
+Content-Type: application/json
+Accept: application/json
+
+{
+  "empId": 1,
+  "attendanceDate": "2026-04-22",
+  "attendanceStatus": "late",
+  "lateMinutes": 10,
+  "overtimeHours": 2.00,
+  "remark": "test update attendance"
+}
+
+###
+### Delete attendance
+### Replace 1 with the actual attendanceId you want to delete.
+DELETE {{baseUrl}}/api/attendance/6
+Accept: application/json
