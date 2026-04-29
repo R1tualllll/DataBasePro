@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业员工管理系统</title>
+    <style>
+        :root {
+            --bg: #eef1f5;
+            --panel: #ffffff;
+            --panel-soft: #f7f9fc;
+            --text: #1e2733;
+            --muted: #6b7685;
+            --line: #d9e0ea;
+            --brand: #1f6feb;
+            --brand-dark: #154ea8;
+            --danger: #c2413b;
+            --danger-soft: #fff0ee;
+            --ok: #197a46;
+            --shadow: 0 14px 40px rgba(31, 47, 70, 0.10);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "Microsoft YaHei", "Noto Sans SC", sans-serif;
+            background:
+                    linear-gradient(135deg, rgba(31, 111, 235, 0.10), transparent 32%),
+                    linear-gradient(315deg, rgba(25, 122, 70, 0.08), transparent 28%),
+                    var(--bg);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            padding: 28px 18px;
+            background: #132033;
+            color: #f8fbff;
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            margin-bottom: 28px;
+            padding: 0 8px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 24px;
+            line-height: 1.3;
+        }
+
+        .brand p {
+            margin: 8px 0 0;
+            color: #9fb2cf;
+            font-size: 13px;
+        }
+
+        .nav {
+            display: grid;
+            gap: 8px;
+        }
+
+        .nav button {
+            width: 100%;
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            text-align: left;
+            color: #c7d3e5;
+            background: transparent;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .nav button:hover,
+        .nav button.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .content {
+            padding: 28px;
+            overflow-x: hidden;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .topbar h2 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .topbar p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .status {
+            min-width: 220px;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            color: var(--muted);
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .status.success {
+            color: var(--ok);
+        }
+
+        .status.error {
+            color: var(--danger);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .hero-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.95fr);
+            align-items: stretch;
+            gap: 0;
+            margin-bottom: 20px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .hero-copy {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background:
+                    linear-gradient(135deg, rgba(31, 111, 235, 0.08), transparent 42%),
+                    #ffffff;
+        }
+
+        .hero-copy span {
+            color: var(--brand);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .hero-copy h3 {
+            margin: 10px 0 8px;
+            font-size: 24px;
+            line-height: 1.35;
+        }
+
+        .hero-copy p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .hero-image {
+            min-height: 220px;
+            background: #dfe8f3;
+        }
+
+        .hero-image img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .metric {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .metric span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .metric strong {
+            display: block;
+            margin-top: 8px;
+            font-size: 26px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--line);
+            background: var(--panel-soft);
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .panel-body {
+            padding: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        label {
+            display: grid;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 10px 11px;
+            color: var(--text);
+            background: #ffffff;
+            font: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 40px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        button.primary,
+        button.secondary,
+        button.danger {
+            border: 0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        button.primary {
+            color: #ffffff;
+            background: var(--brand);
+        }
+
+        button.primary:hover {
+            background: var(--brand-dark);
+        }
+
+        button.secondary {
+            color: var(--text);
+            background: #e8edf5;
+        }
+
+        button.danger {
+            color: var(--danger);
+            background: var(--danger-soft);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            color: var(--muted);
+            background: #fbfcfe;
+            font-weight: 600;
+        }
+
+        tr:hover td {
+            background: #f8fbff;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .row-actions button {
+            border: 0;
+            border-radius: 6px;
+            padding: 7px 10px;
+            cursor: pointer;
+            background: #eef3fb;
+        }
+
+        .row-actions button:last-child {
+            color: var(--danger);
+            background: var(--danger-soft);
+        }
+
+        .statistics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .chart {
+            display: grid;
+            gap: 12px;
+            padding: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 92px minmax(120px, 1fr) 42px;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .chart-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--muted);
+        }
+
+        .chart-track {
+            height: 12px;
+            border-radius: 999px;
+            background: #e7edf6;
+            overflow: hidden;
+        }
+
+        .chart-bar {
+            height: 100%;
+            min-width: 4px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--brand), #20a67a);
+        }
+
+        .chart-count {
+            text-align: right;
+            font-weight: 700;
+        }
+
+        @media (max-width: 980px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                padding: 16px;
+            }
+
+            .brand {
+                margin-bottom: 12px;
+            }
+
+            .nav {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .dashboard,
+            .form-grid,
+            .hero-card,
+            .statistics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .content {
+                padding: 18px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .dashboard,
+            .form-grid,
+            .hero-card,
+            .statistics-grid,
+            .nav {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-image {
+                min-height: 180px;
+            }
+
+            .status {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>企业员工管理系统</h1>
+            <p>Department · Employee · Attendance · Salary</p>
+        </div>
+        <nav class="nav" id="nav"></nav>
+    </aside>
+
+    <main class="content">
+        <div class="topbar">
+            <div>
+                <h2 id="pageTitle">部门管理</h2>
+                <p id="pageDesc">维护企业部门主数据。</p>
+            </div>
+            <div class="status" id="statusText">等待操作</div>
+        </div>
+
+        <section class="hero-card">
+            <div class="hero-copy">
+                <span>EMS WORKSPACE</span>
+                <h3>集中维护员工、部门、考勤与薪资数据</h3>
+                <p>这个页面直接连接 Spring Boot 后端接口，适合课堂演示完整的数据库增删改查流程和统计查询结果。</p>
+            </div>
+            <div class="hero-image">
+                <img src="/assets/ems-hero.png" alt="企业员工管理系统视觉图">
+            </div>
+        </section>
+
+        <section class="dashboard">
+            <div class="metric"><span>部门数量</span><strong id="metricDepartments">0</strong></div>
+            <div class="metric"><span>岗位数量</span><strong id="metricPositions">0</strong></div>
+            <div class="metric"><span>员工数量</span><strong id="metricEmployees">0</strong></div>
+            <div class="metric"><span>考勤记录</span><strong id="metricAttendance">0</strong></div>
+        </section>
+
+        <div id="sections"></div>
+    </main>
+</div>
+
+<script>
+    const state = {
+        activeModule: 'departments',
+        editing: {},
+        data: {
+            departments: [],
+            positions: [],
+            employees: [],
+            attendance: [],
+            salaries: [],
+            statisticsByDepartment: [],
+            statisticsByPosition: []
+        }
+    };
+
+    const modules = [
+        {
+            key: 'departments',
+            title: '部门管理',
+            desc: '维护企业部门主数据。',
+            endpoint: '/api/departments',
+            idField: 'deptId',
+            fields: [
+                {name: 'deptName', label: '部门名称', required: true},
+                {name: 'deptCode', label: '部门编号', required: true},
+                {name: 'managerName', label: '负责人'},
+                {name: 'phone', label: '联系电话'},
+                {name: 'location', label: '办公地点'}
+            ],
+            columns: [
+                {name: 'deptId', label: 'ID'},
+                {name: 'deptCode', label: '编号'},
+                {name: 'deptName', label: '名称'},
+                {name: 'managerName', label: '负责人'},
+                {name: 'phone', label: '电话'},
+                {name: 'location', label: '地点'}
+            ]
+        },
+        {
+            key: 'positions',
+            title: '岗位管理',
+            desc: '维护岗位、级别和基础工资。',
+            endpoint: '/api/positions',
+            idField: 'positionId',
+            fields: [
+                {name: 'positionName', label: '岗位名称', required: true},
+                {name: 'positionCode', label: '岗位编号', required: true},
+                {name: 'level', label: '岗位级别'},
+                {name: 'baseSalary', label: '基础工资', type: 'number', step: '0.01', required: true},
+                {name: 'description', label: '岗位描述'}
+            ],
+            columns: [
+                {name: 'positionId', label: 'ID'},
+                {name: 'positionCode', label: '编号'},
+                {name: 'positionName', label: '名称'},
+                {name: 'level', label: '级别'},
+                {name: 'baseSalary', label: '基础工资'},
+                {name: 'description', label: '描述'}
+            ]
+        },
+        {
+            key: 'employees',
+            title: '员工管理',
+            desc: '维护员工基本信息和当前部门岗位。',
+            endpoint: '/api/employees',
+            idField: 'empId',
+            fields: [
+                {name: 'empName', label: '员工姓名', required: true},
+                {name: 'gender', label: '性别', type: 'select', options: [['male', '男'], ['female', '女']], required: true},
+                {name: 'age', label: '年龄', type: 'number', required: true},
+                {name: 'phone', label: '手机号'},
+                {name: 'email', label: '邮箱'},
+                {name: 'hireDate', label: '入职日期', type: 'date', required: true},
+                {name: 'deptId', label: '部门', type: 'department', required: true},
+                {name: 'positionId', label: '岗位', type: 'position', required: true},
+                {name: 'status', label: '状态', type: 'select', options: [['active', '在职'], ['probation', '试用期'], ['resigned', '离职']], required: true},
+                {name: 'leaveDate', label: '离职日期', type: 'date'}
+            ],
+            columns: [
+                {name: 'empId', label: 'ID'},
+                {name: 'empName', label: '姓名'},
+                {name: 'gender', label: '性别', render: value => value === 'male' ? '男' : '女'},
+                {name: 'age', label: '年龄'},
+                {name: 'phone', label: '手机号'},
+                {name: 'hireDate', label: '入职日期'},
+                {name: 'deptId', label: '部门', render: value => findName('departments', 'deptId', 'deptName', value)},
+                {name: 'positionId', label: '岗位', render: value => findName('positions', 'positionId', 'positionName', value)},
+                {name: 'status', label: '状态'},
+                {name: 'leaveDate', label: '离职日期'}
+            ]
+        },
+        {
+            key: 'attendance',
+            title: '考勤管理',
+            desc: '登记员工每日出勤、迟到、请假和缺勤。',
+            endpoint: '/api/attendance',
+            idField: 'attendanceId',
+            fields: [
+                {name: 'empId', label: '员工', type: 'employee', required: true},
+                {name: 'attendanceDate', label: '考勤日期', type: 'date', required: true},
+                {name: 'attendanceStatus', label: '考勤状态', type: 'select', options: [['present', '出勤'], ['late', '迟到'], ['leave', '请假'], ['absent', '缺勤']], required: true},
+                {name: 'lateMinutes', label: '迟到分钟', type: 'number'},
+                {name: 'overtimeHours', label: '加班小时', type: 'number', step: '0.01'},
+                {name: 'remark', label: '备注'}
+            ],
+            columns: [
+                {name: 'attendanceId', label: 'ID'},
+                {name: 'empId', label: '员工', render: value => findName('employees', 'empId', 'empName', value)},
+                {name: 'attendanceDate', label: '日期'},
+                {name: 'attendanceStatus', label: '状态'},
+                {name: 'lateMinutes', label: '迟到分钟'},
+                {name: 'overtimeHours', label: '加班小时'},
+                {name: 'remark', label: '备注'}
+            ]
+        },
+        {
+            key: 'salaries',
+            title: '薪资管理',
+            desc: '维护员工月度薪资、奖金和扣款。',
+            endpoint: '/api/salaries',
+            idField: 'salaryId',
+            fields: [
+                {name: 'empId', label: '员工', type: 'employee', required: true},
+                {name: 'salaryMonth', label: '薪资月份', placeholder: '2026-05', required: true},
+                {name: 'baseSalary', label: '基础工资', type: 'number', step: '0.01', required: true},
+                {name: 'bonus', label: '奖金', type: 'number', step: '0.01'},
+                {name: 'deduction', label: '扣款', type: 'number', step: '0.01'},
+                {name: 'netSalary', label: '实发工资', type: 'number', step: '0.01', required: true}
+            ],
+            columns: [
+                {name: 'salaryId', label: 'ID'},
+                {name: 'empId', label: '员工', render: value => findName('employees', 'empId', 'empName', value)},
+                {name: 'salaryMonth', label: '月份'},
+                {name: 'baseSalary', label: '基础工资'},
+                {name: 'bonus', label: '奖金'},
+                {name: 'deduction', label: '扣款'},
+                {name: 'netSalary', label: '实发工资'}
+            ]
+        }
+    ];
+
+    const statisticsModule = {
+        key: 'statistics',
+        title: '统计分析',
+        desc: '查看部门和岗位维度的员工人数。'
+    };
+
+    function setStatus(message, type = '') {
+        const status = document.getElementById('statusText');
+        status.textContent = message;
+        status.className = `status ${type}`;
+    }
+
+    async function request(url, options = {}) {
+        const response = await fetch(url, {
+            headers: {'Content-Type': 'application/json', ...(options.headers || {})},
+            ...options
+        });
+        const result = await response.json();
+        if (result.code !== 0) {
+            throw new Error(result.message || '请求失败');
+        }
+        return result.data;
+    }
+
+    function findName(collection, idField, nameField, id) {
+        const row = state.data[collection].find(item => Number(item[idField]) === Number(id));
+        return row ? row[nameField] : id;
+    }
+
+    function renderNavigation() {
+        const nav = document.getElementById('nav');
+        const allModules = [...modules, statisticsModule];
+        nav.innerHTML = allModules.map(item => `
+            <button type="button" class="${item.key === state.activeModule ? 'active' : ''}" data-module="${item.key}">
+                ${item.title}
+            </button>
+        `).join('');
+
+        nav.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', () => switchModule(button.dataset.module));
+        });
+    }
+
+    function renderSections() {
+        const container = document.getElementById('sections');
+        container.innerHTML = [
+            ...modules.map(renderCrudSection),
+            renderStatisticsSection()
+        ].join('');
+
+        modules.forEach(module => {
+            const form = document.getElementById(`${module.key}Form`);
+            form.addEventListener('submit', event => submitForm(event, module));
+            document.getElementById(`${module.key}Cancel`).addEventListener('click', () => resetForm(module));
+            renderTable(module);
+        });
+        renderStatisticsTables();
+    }
+
+    function renderCrudSection(module) {
+        return `
+            <section class="section ${module.key === state.activeModule ? 'active' : ''}" id="${module.key}Section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>${module.title}</h3>
+                        <button class="secondary" type="button" onclick="refreshModule('${module.key}')">刷新列表</button>
+                    </div>
+                    <div class="panel-body">
+                        <form id="${module.key}Form">
+                            <div class="form-grid">
+                                ${module.fields.map(field => renderField(module, field)).join('')}
+                            </div>
+                            <div class="actions">
+                                <button class="primary" type="submit" id="${module.key}Submit">新增</button>
+                                <button class="secondary" type="button" id="${module.key}Cancel">清空</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                ${module.columns.map(column => `<th>${column.label}</th>`).join('')}
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="${module.key}Table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    function renderField(module, field) {
+        const required = field.required ? 'required' : '';
+        const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : '';
+        let input;
+
+        if (field.type === 'select') {
+            input = `
+                <select name="${field.name}" ${required}>
+                    <option value="">请选择</option>
+                    ${field.options.map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}
+                </select>
+            `;
+        } else if (field.type === 'department') {
+            input = `<select name="${field.name}" ${required} data-source="departments"></select>`;
+        } else if (field.type === 'position') {
+            input = `<select name="${field.name}" ${required} data-source="positions"></select>`;
+        } else if (field.type === 'employee') {
+            input = `<select name="${field.name}" ${required} data-source="employees"></select>`;
+        } else {
+            input = `
+                <input
+                    name="${field.name}"
+                    type="${field.type || 'text'}"
+                    step="${field.step || ''}"
+                    ${placeholder}
+                    ${required}
+                >
+            `;
+        }
+
+        return `<label>${field.label}${input}</label>`;
+    }
+
+    function renderStatisticsSection() {
+        return `
+            <section class="section ${state.activeModule === 'statistics' ? 'active' : ''}" id="statisticsSection">
+                <div class="statistics-grid">
+                    ${renderStatisticsPanel('按部门统计员工人数', 'statisticsDepartmentChart', 'statisticsDepartmentTable')}
+                    ${renderStatisticsPanel('按岗位统计员工人数', 'statisticsPositionChart', 'statisticsPositionTable')}
+                </div>
+            </section>
+        `;
+    }
+
+    function renderStatisticsPanel(title, chartId, tableId) {
+        return `
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>${title}</h3>
+                    <button class="secondary" type="button" onclick="refreshStatistics()">刷新统计</button>
+                </div>
+                <div class="chart" id="${chartId}"></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>员工人数</th>
+                        </tr>
+                        </thead>
+                        <tbody id="${tableId}"></tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderDependentSelects() {
+        document.querySelectorAll('select[data-source]').forEach(select => {
+            const source = select.dataset.source;
+            const value = select.value;
+            let options = '<option value="">请选择</option>';
+            if (source === 'departments') {
+                options += state.data.departments.map(item => `<option value="${item.deptId}">${item.deptName}</option>`).join('');
+            }
+            if (source === 'positions') {
+                options += state.data.positions.map(item => `<option value="${item.positionId}">${item.positionName}</option>`).join('');
+            }
+            if (source === 'employees') {
+                options += state.data.employees.map(item => `<option value="${item.empId}">${item.empName}</option>`).join('');
+            }
+            select.innerHTML = options;
+            select.value = value;
+        });
+    }
+
+    function renderTable(module) {
+        const tbody = document.getElementById(`${module.key}Table`);
+        const rows = state.data[module.key];
+        tbody.innerHTML = rows.length ? rows.map(row => `
+            <tr>
+                ${module.columns.map(column => {
+                    const raw = row[column.name];
+                    const value = column.render ? column.render(raw, row) : raw;
+                    return `<td>${value ?? ''}</td>`;
+                }).join('')}
+                <td>
+                    <div class="row-actions">
+                        <button type="button" onclick="editRow('${module.key}', ${row[module.idField]})">编辑</button>
+                        <button type="button" onclick="deleteRow('${module.key}', ${row[module.idField]})">删除</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('') : `<tr><td colspan="${module.columns.length + 1}">暂无数据</td></tr>`;
+    }
+
+    function renderStatisticsTables() {
+        const departmentTable = document.getElementById('statisticsDepartmentTable');
+        const positionTable = document.getElementById('statisticsPositionTable');
+        const departmentChart = document.getElementById('statisticsDepartmentChart');
+        const positionChart = document.getElementById('statisticsPositionChart');
+        departmentTable.innerHTML = renderStatisticsRows(state.data.statisticsByDepartment);
+        positionTable.innerHTML = renderStatisticsRows(state.data.statisticsByPosition);
+        departmentChart.innerHTML = renderStatisticsChart(state.data.statisticsByDepartment);
+        positionChart.innerHTML = renderStatisticsChart(state.data.statisticsByPosition);
+    }
+
+    function renderStatisticsRows(rows) {
+        return rows.length ? rows.map(row => `
+            <tr>
+                <td>${row.id}</td>
+                <td>${row.name}</td>
+                <td>${row.employeeCount}</td>
+            </tr>
+        `).join('') : '<tr><td colspan="3">暂无数据</td></tr>';
+    }
+
+    function renderStatisticsChart(rows) {
+        if (!rows.length) {
+            return '<div class="chart-row"><span class="chart-name">暂无数据</span><div class="chart-track"></div><span class="chart-count">0</span></div>';
+        }
+        const max = Math.max(...rows.map(row => Number(row.employeeCount) || 0), 1);
+        return rows.map(row => {
+            const count = Number(row.employeeCount) || 0;
+            const width = Math.max((count / max) * 100, count > 0 ? 8 : 0);
+            return `
+                <div class="chart-row">
+                    <span class="chart-name" title="${row.name}">${row.name}</span>
+                    <div class="chart-track">
+                        <div class="chart-bar" style="width: ${width}%"></div>
+                    </div>
+                    <span class="chart-count">${count}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderMetrics() {
+        document.getElementById('metricDepartments').textContent = state.data.departments.length;
+        document.getElementById('metricPositions').textContent = state.data.positions.length;
+        document.getElementById('metricEmployees').textContent = state.data.employees.length;
+        document.getElementById('metricAttendance').textContent = state.data.attendance.length;
+    }
+
+    function switchModule(key) {
+        state.activeModule = key;
+        const current = [...modules, statisticsModule].find(item => item.key === key);
+        document.getElementById('pageTitle').textContent = current.title;
+        document.getElementById('pageDesc').textContent = current.desc;
+
+        document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+        document.getElementById(`${key}Section`).classList.add('active');
+        renderNavigation();
+    }
+
+    function readPayload(module) {
+        const form = document.getElementById(`${module.key}Form`);
+        const formData = new FormData(form);
+        const payload = {};
+        module.fields.forEach(field => {
+            const rawValue = formData.get(field.name);
+            if (rawValue === '') {
+                payload[field.name] = null;
+                return;
+            }
+            if (field.type === 'number' || ['department', 'position', 'employee'].includes(field.type)) {
+                payload[field.name] = Number(rawValue);
+                return;
+            }
+            payload[field.name] = rawValue;
+        });
+        return payload;
+    }
+
+    async function submitForm(event, module) {
+        event.preventDefault();
+        const id = state.editing[module.key];
+        const payload = readPayload(module);
+        const url = id ? `${module.endpoint}/${id}` : module.endpoint;
+        const method = id ? 'PUT' : 'POST';
+
+        try {
+            await request(url, {method, body: JSON.stringify(payload)});
+            setStatus(id ? '修改成功' : '新增成功', 'success');
+            resetForm(module);
+            await refreshModule(module.key);
+            await refreshStatistics();
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    function editRow(moduleKey, id) {
+        const module = modules.find(item => item.key === moduleKey);
+        const row = state.data[module.key].find(item => Number(item[module.idField]) === Number(id));
+        if (!row) {
+            setStatus('未找到要编辑的数据', 'error');
+            return;
+        }
+
+        const form = document.getElementById(`${module.key}Form`);
+        module.fields.forEach(field => {
+            const input = form.elements[field.name];
+            if (input) {
+                input.value = row[field.name] ?? '';
+            }
+        });
+
+        state.editing[module.key] = id;
+        document.getElementById(`${module.key}Submit`).textContent = '保存修改';
+        setStatus(`正在编辑 ${module.title} ID: ${id}`);
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    async function deleteRow(moduleKey, id) {
+        const module = modules.find(item => item.key === moduleKey);
+        if (!confirm(`确认删除 ${module.title} ID: ${id} 吗？`)) {
+            return;
+        }
+
+        try {
+            await request(`${module.endpoint}/${id}`, {method: 'DELETE'});
+            setStatus('删除成功', 'success');
+            await refreshModule(module.key);
+            await refreshStatistics();
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    function resetForm(module) {
+        const form = document.getElementById(`${module.key}Form`);
+        form.reset();
+        delete state.editing[module.key];
+        document.getElementById(`${module.key}Submit`).textContent = '新增';
+    }
+
+    async function refreshModule(key) {
+        const module = modules.find(item => item.key === key);
+        try {
+            state.data[key] = await request(module.endpoint);
+            renderDependentSelects();
+            renderTable(module);
+            renderMetrics();
+            setStatus(`${module.title}已刷新`, 'success');
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    async function refreshStatistics() {
+        try {
+            const [byDepartment, byPosition] = await Promise.all([
+                request('/api/statistics/employees-by-department'),
+                request('/api/statistics/employees-by-position')
+            ]);
+            state.data.statisticsByDepartment = byDepartment;
+            state.data.statisticsByPosition = byPosition;
+            renderStatisticsTables();
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    async function loadAll() {
+        setStatus('正在加载数据...');
+        try {
+            for (const module of modules) {
+                state.data[module.key] = await request(module.endpoint);
+            }
+            await refreshStatistics();
+            renderDependentSelects();
+            modules.forEach(renderTable);
+            renderMetrics();
+            setStatus('数据加载完成', 'success');
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    renderNavigation();
+    renderSections();
+    loadAll();
+</script>
+</body>
+</html>
