@@ -6,18 +6,23 @@
     <title>企业员工管理系统</title>
     <style>
         :root {
-            --bg: #eef1f5;
+            --bg: #edf5f1;
             --panel: #ffffff;
-            --panel-soft: #f7f9fc;
-            --text: #1e2733;
-            --muted: #6b7685;
-            --line: #d9e0ea;
-            --brand: #1f6feb;
-            --brand-dark: #154ea8;
-            --danger: #c2413b;
-            --danger-soft: #fff0ee;
-            --ok: #197a46;
-            --shadow: 0 14px 40px rgba(31, 47, 70, 0.10);
+            --panel-soft: #f8fbf8;
+            --text: #17352d;
+            --muted: #63746d;
+            --line: #dce7df;
+            --brand: #15956c;
+            --brand-dark: #0f6e50;
+            --accent: #2c7be5;
+            --accent-soft: #e8f2ff;
+            --danger: #b7423a;
+            --danger-soft: #fff0ed;
+            --ok: #12805c;
+            --sidebar: #17352d;
+            --shadow: 0 18px 45px rgba(23, 53, 45, 0.12);
+            --shadow-soft: 0 8px 24px rgba(23, 53, 45, 0.08);
+            --radius: 18px;
         }
 
         * {
@@ -30,39 +35,85 @@
             color: var(--text);
             font-family: "Microsoft YaHei", "Noto Sans SC", sans-serif;
             background:
-                    linear-gradient(135deg, rgba(31, 111, 235, 0.10), transparent 32%),
-                    linear-gradient(315deg, rgba(25, 122, 70, 0.08), transparent 28%),
+                    radial-gradient(circle at 82% 8%, rgba(44, 123, 229, 0.14), transparent 26%),
+                    radial-gradient(circle at 30% 22%, rgba(21, 149, 108, 0.16), transparent 28%),
+                    linear-gradient(135deg, rgba(255, 255, 255, 0.75), transparent 38%),
                     var(--bg);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.34;
+            pointer-events: none;
+            background-image:
+                    linear-gradient(rgba(23, 53, 45, 0.045) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(23, 53, 45, 0.045) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(180deg, #000 0%, transparent 82%);
         }
 
         .layout {
             display: grid;
-            grid-template-columns: 240px 1fr;
+            grid-template-columns: 264px 1fr;
             min-height: 100vh;
         }
 
         .sidebar {
-            padding: 28px 18px;
-            background: #132033;
+            position: sticky;
+            top: 0;
+            align-self: start;
+            min-height: 100vh;
+            padding: 30px 18px;
+            background:
+                    radial-gradient(circle at 45% 0, rgba(255, 255, 255, 0.16), transparent 24%),
+                    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 28%),
+                    var(--sidebar);
             color: #f8fbff;
             box-shadow: var(--shadow);
         }
 
         .brand {
             margin-bottom: 28px;
-            padding: 0 8px;
+            padding: 4px 8px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
         }
 
         .brand h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 23px;
             line-height: 1.3;
         }
 
         .brand p {
             margin: 8px 0 0;
-            color: #9fb2cf;
+            color: #b5d7c9;
             font-size: 13px;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            padding: 6px 10px;
+            color: #ddf7ed;
+            background: rgba(255, 255, 255, 0.08);
+            font-size: 12px;
+        }
+
+        .brand-badge::before,
+        .status::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #45e0a5;
+            box-shadow: 0 0 0 6px rgba(69, 224, 165, 0.14);
         }
 
         .nav {
@@ -73,23 +124,29 @@
         .nav button {
             width: 100%;
             border: 0;
-            border-radius: 8px;
-            padding: 12px 14px;
+            border-radius: 14px;
+            padding: 13px 14px;
             text-align: left;
-            color: #c7d3e5;
+            color: #c4dbd2;
             background: transparent;
             cursor: pointer;
             font-size: 15px;
+            transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease;
         }
 
         .nav button:hover,
         .nav button.active {
             color: #ffffff;
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(3px);
+        }
+
+        .nav button.active {
+            box-shadow: inset 3px 0 0 #45e0a5;
         }
 
         .content {
-            padding: 28px;
+            padding: 30px clamp(20px, 3vw, 40px) 40px;
             overflow-x: hidden;
         }
 
@@ -98,12 +155,13 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
 
         .topbar h2 {
             margin: 0;
-            font-size: 26px;
+            font-size: 28px;
+            letter-spacing: 0;
         }
 
         .topbar p {
@@ -113,13 +171,18 @@
         }
 
         .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
             min-width: 220px;
-            border-radius: 8px;
-            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 10px 14px;
             font-size: 13px;
             color: var(--muted);
-            background: var(--panel);
-            box-shadow: var(--shadow);
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(14px);
         }
 
         .status.success {
@@ -130,34 +193,60 @@
             color: var(--danger);
         }
 
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         .dashboard {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 20px;
+            gap: 16px;
+            margin-bottom: 22px;
         }
 
         .hero-card {
+            position: relative;
             display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.95fr);
+            grid-template-columns: minmax(320px, 0.92fr) minmax(360px, 1.08fr);
             align-items: stretch;
             gap: 0;
-            margin-bottom: 20px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--panel);
+            min-height: 360px;
+            margin-bottom: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.76);
             box-shadow: var(--shadow);
             overflow: hidden;
+            isolation: isolate;
+        }
+
+        .hero-card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            z-index: -1;
+            background:
+                    radial-gradient(circle at var(--spotlight-x, 68%) var(--spotlight-y, 22%), rgba(44, 123, 229, 0.22), transparent 24%),
+                    linear-gradient(135deg, rgba(21, 149, 108, 0.18), rgba(255, 255, 255, 0));
+            opacity: 0.95;
         }
 
         .hero-copy {
-            padding: 24px;
+            position: relative;
+            z-index: 2;
+            padding: clamp(28px, 4vw, 48px);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            background:
-                    linear-gradient(135deg, rgba(31, 111, 235, 0.08), transparent 42%),
-                    #ffffff;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.62), transparent);
         }
 
         .hero-copy span {
@@ -168,21 +257,59 @@
         }
 
         .hero-copy h3 {
-            margin: 10px 0 8px;
-            font-size: 24px;
-            line-height: 1.35;
+            margin: 12px 0 10px;
+            max-width: 560px;
+            font-size: clamp(30px, 4vw, 46px);
+            line-height: 1.16;
         }
 
         .hero-copy p {
             margin: 0;
             color: var(--muted);
             line-height: 1.7;
-            font-size: 14px;
+            font-size: 15px;
+            max-width: 560px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .hero-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 22px;
+        }
+
+        .hero-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid rgba(21, 149, 108, 0.18);
+            border-radius: 999px;
+            padding: 7px 10px;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.72);
+            font-size: 12px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .hero-chip::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--brand), var(--accent));
         }
 
         .hero-image {
-            min-height: 220px;
-            background: #dfe8f3;
+            position: relative;
+            min-height: 320px;
+            background: #dbeae4;
         }
 
         .hero-image img {
@@ -190,14 +317,56 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            filter: saturate(1.06) contrast(1.02);
+            transform: scale(1.012);
+        }
+
+        .hero-image::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.72), transparent 38%),
+                    linear-gradient(0deg, rgba(23, 53, 45, 0.18), transparent 44%);
+            pointer-events: none;
         }
 
         .metric {
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            padding: 16px;
-            background: var(--panel);
-            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 20px;
+            padding: 19px;
+            background:
+                    linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 251, 248, 0.82)),
+                    var(--panel);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .metric::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand), var(--accent));
+        }
+
+        .metric::after {
+            content: "";
+            position: absolute;
+            right: -22px;
+            bottom: -28px;
+            width: 92px;
+            height: 92px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(44, 123, 229, 0.14), transparent 62%);
+        }
+
+        .metric:hover {
+            transform: translateY(-3px);
+            border-color: rgba(21, 149, 108, 0.28);
+            box-shadow: 0 16px 38px rgba(23, 53, 45, 0.14);
         }
 
         .metric span {
@@ -208,7 +377,8 @@
         .metric strong {
             display: block;
             margin-top: 8px;
-            font-size: 26px;
+            font-size: 34px;
+            letter-spacing: 0;
         }
 
         .section {
@@ -217,14 +387,16 @@
 
         .section.active {
             display: block;
+            animation: sectionIn 0.24s ease-out;
         }
 
         .panel {
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--panel);
-            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: var(--shadow-soft);
             overflow: hidden;
+            backdrop-filter: blur(16px);
         }
 
         .panel-header {
@@ -234,7 +406,9 @@
             gap: 12px;
             padding: 16px 18px;
             border-bottom: 1px solid var(--line);
-            background: var(--panel-soft);
+            background:
+                    linear-gradient(90deg, rgba(21, 149, 108, 0.10), rgba(44, 123, 229, 0.06), transparent),
+                    rgba(248, 251, 248, 0.86);
         }
 
         .panel-header h3 {
@@ -244,6 +418,10 @@
 
         .panel-body {
             padding: 18px;
+        }
+
+        .panel-body.editing-target {
+            animation: editTargetGlow 1.2s ease;
         }
 
         .form-grid {
@@ -263,12 +441,22 @@
         select,
         textarea {
             width: 100%;
-            border: 1px solid var(--line);
-            border-radius: 6px;
-            padding: 10px 11px;
+            border: 1px solid rgba(220, 231, 223, 0.92);
+            border-radius: 13px;
+            padding: 11px 12px;
             color: var(--text);
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.88);
             font: inherit;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid rgba(21, 149, 108, 0.18);
+            border-color: var(--brand);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(21, 149, 108, 0.08);
         }
 
         textarea {
@@ -287,15 +475,25 @@
         button.secondary,
         button.danger {
             border: 0;
-            border-radius: 6px;
+            border-radius: 999px;
             padding: 10px 14px;
             cursor: pointer;
             font: inherit;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        button.primary:hover,
+        button.secondary:hover,
+        button.danger:hover,
+        .row-actions button:hover,
+        .pagination button:hover {
+            transform: translateY(-1px);
         }
 
         button.primary {
             color: #ffffff;
-            background: var(--brand);
+            background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+            box-shadow: 0 10px 20px rgba(21, 149, 108, 0.22);
         }
 
         button.primary:hover {
@@ -304,12 +502,43 @@
 
         button.secondary {
             color: var(--text);
-            background: #e8edf5;
+            background: #edf6f2;
         }
 
         button.danger {
             color: var(--danger);
             background: var(--danger-soft);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.52;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid rgba(44, 123, 229, 0.28);
+            outline-offset: 2px;
+        }
+
+        .table-toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(130px, 180px) minmax(110px, 140px) auto;
+            gap: 10px;
+            align-items: center;
+            padding: 14px 18px;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            background: rgba(251, 253, 251, 0.86);
+        }
+
+        .table-summary {
+            color: var(--muted);
+            font-size: 13px;
+            text-align: right;
+            white-space: nowrap;
         }
 
         .table-wrap {
@@ -333,12 +562,16 @@
 
         th {
             color: var(--muted);
-            background: #fbfcfe;
+            background: #fbfdfb;
             font-weight: 600;
         }
 
         tr:hover td {
-            background: #f8fbff;
+            background: #f7fbf8;
+        }
+
+        tbody tr {
+            animation: rowIn 0.22s ease both;
         }
 
         .row-actions {
@@ -348,15 +581,35 @@
 
         .row-actions button {
             border: 0;
-            border-radius: 6px;
+            border-radius: 999px;
             padding: 7px 10px;
             cursor: pointer;
-            background: #eef3fb;
+            background: #eaf3ef;
         }
 
         .row-actions button:last-child {
             color: var(--danger);
             background: var(--danger-soft);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 12px 18px;
+            color: var(--muted);
+            font-size: 13px;
+            background: #fbfdfb;
+        }
+
+        .pagination button {
+            border: 0;
+            border-radius: 999px;
+            padding: 7px 11px;
+            cursor: pointer;
+            color: var(--text);
+            background: #eaf3ef;
         }
 
         .statistics-grid {
@@ -390,7 +643,7 @@
         .chart-track {
             height: 12px;
             border-radius: 999px;
-            background: #e7edf6;
+            background: #e7f0ea;
             overflow: hidden;
         }
 
@@ -398,12 +651,821 @@
             height: 100%;
             min-width: 4px;
             border-radius: 999px;
-            background: linear-gradient(90deg, var(--brand), #20a67a);
+            background: linear-gradient(90deg, var(--brand), var(--accent));
+            transform-origin: left center;
+            animation: barGrow 0.56s ease both;
         }
 
         .chart-count {
             text-align: right;
             font-weight: 700;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: rgba(11, 26, 22, 0.48);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-backdrop[hidden] {
+            display: none;
+        }
+
+        .modal {
+            width: min(420px, 100%);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: var(--shadow);
+            animation: modalIn 0.18s ease-out;
+        }
+
+        .modal h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .modal p {
+            margin: 12px 0 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .toast-stack {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            z-index: 60;
+            display: grid;
+            gap: 10px;
+            width: min(360px, calc(100vw - 32px));
+            pointer-events: none;
+        }
+
+        .toast {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: start;
+            border: 1px solid rgba(220, 231, 223, 0.9);
+            border-radius: 18px;
+            padding: 14px 14px;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            pointer-events: auto;
+            animation: toastIn 0.22s ease-out both;
+        }
+
+        .toast::before {
+            content: "!";
+            display: grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 999px;
+            color: #ffffff;
+            background: var(--danger);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .toast.success::before {
+            content: "✓";
+            background: var(--ok);
+        }
+
+        .toast strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 14px;
+        }
+
+        .toast span {
+            display: block;
+            color: var(--muted);
+            line-height: 1.5;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .toast button {
+            border: 0;
+            padding: 0 4px;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes sectionIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes rowIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes barGrow {
+            from {
+                transform: scaleX(0);
+            }
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes editTargetGlow {
+            0% {
+                box-shadow: inset 0 0 0 0 rgba(47, 128, 237, 0);
+                background: rgba(47, 128, 237, 0);
+            }
+            35% {
+                box-shadow: inset 0 0 0 2px rgba(47, 128, 237, 0.22);
+                background: rgba(47, 128, 237, 0.06);
+            }
+            100% {
+                box-shadow: inset 0 0 0 0 rgba(47, 128, 237, 0);
+                background: rgba(47, 128, 237, 0);
+            }
+        }
+
+        /* Pro-grade visual layer */
+        :root {
+            --bg: #eef4ef;
+            --panel: rgba(255, 255, 255, 0.76);
+            --panel-soft: rgba(248, 251, 248, 0.68);
+            --text: #102620;
+            --muted: #687b73;
+            --line: rgba(255, 255, 255, 0.54);
+            --brand: #0f7662;
+            --brand-dark: #0b4f43;
+            --accent: #2f80ed;
+            --accent-soft: rgba(47, 128, 237, 0.13);
+            --gold: #d6a84f;
+            --glass: rgba(255, 255, 255, 0.68);
+            --glass-strong: rgba(255, 255, 255, 0.82);
+            --hairline: rgba(255, 255, 255, 0.72);
+            --shadow: 0 28px 80px rgba(20, 45, 38, 0.16);
+            --shadow-soft: 0 14px 36px rgba(20, 45, 38, 0.10);
+            --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+            --radius: 26px;
+        }
+
+        html {
+            color-scheme: light;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "HarmonyOS Sans SC", "MiSans", "PingFang SC", "Microsoft YaHei", sans-serif;
+            letter-spacing: 0;
+            background:
+                    radial-gradient(circle at 14% 12%, rgba(214, 168, 79, 0.18), transparent 28%),
+                    radial-gradient(circle at 72% 8%, rgba(47, 128, 237, 0.22), transparent 30%),
+                    radial-gradient(circle at 88% 70%, rgba(15, 118, 98, 0.18), transparent 34%),
+                    linear-gradient(135deg, #f7fbf8 0%, #edf6f5 45%, #eef3fb 100%);
+        }
+
+        body::before {
+            opacity: 0.48;
+            background-image:
+                    linear-gradient(rgba(16, 38, 32, 0.035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(16, 38, 32, 0.035) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto -12% -28% -12%;
+            z-index: -1;
+            height: 46vh;
+            pointer-events: none;
+            background:
+                    radial-gradient(circle at 22% 46%, rgba(47, 128, 237, 0.16), transparent 32%),
+                    radial-gradient(circle at 65% 36%, rgba(15, 118, 98, 0.17), transparent 30%),
+                    radial-gradient(circle at 82% 55%, rgba(214, 168, 79, 0.13), transparent 24%);
+            filter: blur(30px);
+            animation: meshDrift 12s ease-in-out infinite alternate;
+        }
+
+        .layout {
+            grid-template-columns: 292px minmax(0, 1fr);
+            gap: 0;
+        }
+
+        .sidebar {
+            min-height: calc(100vh - 32px);
+            margin: 16px 0 16px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 30px;
+            padding: 24px 16px;
+            background:
+                    radial-gradient(circle at 22% 0, rgba(214, 168, 79, 0.18), transparent 24%),
+                    radial-gradient(circle at 85% 18%, rgba(47, 128, 237, 0.20), transparent 30%),
+                    linear-gradient(180deg, rgba(9, 41, 34, 0.92), rgba(10, 31, 28, 0.88));
+            box-shadow: 0 28px 70px rgba(11, 42, 35, 0.22);
+            backdrop-filter: blur(26px) saturate(1.15);
+        }
+
+        .brand {
+            padding: 8px 10px 20px;
+        }
+
+        .brand h1 {
+            font-size: 24px;
+            font-weight: 760;
+            letter-spacing: 0;
+        }
+
+        .brand p {
+            line-height: 1.55;
+        }
+
+        .brand-badge {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .nav {
+            gap: 10px;
+        }
+
+        .nav button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-height: 48px;
+            border: 1px solid transparent;
+            border-radius: 18px;
+            padding: 12px 14px 12px 13px;
+            color: rgba(230, 245, 239, 0.72);
+            font-weight: 560;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .nav button::before {
+            content: "";
+            flex: 0 0 auto;
+            width: 26px;
+            height: 26px;
+            border-radius: 10px;
+            background:
+                    linear-gradient(135deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.06)),
+                    rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20);
+        }
+
+        .nav button[data-module="departments"]::before {
+            clip-path: polygon(14% 34%, 50% 14%, 86% 34%, 86% 80%, 58% 80%, 58% 55%, 42% 55%, 42% 80%, 14% 80%);
+        }
+
+        .nav button[data-module="positions"]::before {
+            clip-path: polygon(18% 28%, 82% 28%, 82% 43%, 58% 43%, 58% 76%, 42% 76%, 42% 43%, 18% 43%);
+        }
+
+        .nav button[data-module="employees"]::before {
+            clip-path: circle(25% at 50% 32%);
+        }
+
+        .nav button[data-module="attendance"]::before {
+            clip-path: polygon(18% 20%, 82% 20%, 82% 82%, 18% 82%);
+        }
+
+        .nav button[data-module="salaries"]::before {
+            clip-path: polygon(20% 30%, 52% 30%, 52% 20%, 68% 20%, 68% 30%, 82% 30%, 82% 76%, 20% 76%);
+        }
+
+        .nav button[data-module="statistics"]::before {
+            clip-path: polygon(18% 78%, 18% 48%, 34% 48%, 34% 78%, 42% 78%, 42% 28%, 58% 28%, 58% 78%, 66% 78%, 66% 38%, 82% 38%, 82% 78%);
+        }
+
+        .nav button:hover,
+        .nav button.active {
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.07));
+            transform: translateX(4px) scale(1.01);
+        }
+
+        .nav button.active {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 12px 28px rgba(0, 0, 0, 0.18);
+        }
+
+        .content {
+            padding: 28px clamp(22px, 3vw, 48px) 48px;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            margin: -10px -8px 22px;
+            border: 1px solid transparent;
+            border-radius: 24px;
+            padding: 10px 8px;
+            backdrop-filter: blur(18px);
+        }
+
+        .topbar h2 {
+            font-size: clamp(26px, 3vw, 34px);
+            font-weight: 780;
+            letter-spacing: 0;
+        }
+
+        .topbar p {
+            line-height: 1.6;
+        }
+
+        .status {
+            border-color: var(--hairline);
+            background: rgba(255, 255, 255, 0.68);
+            box-shadow: var(--shadow-soft), var(--inner-light);
+        }
+
+        .hero-card,
+        .metric,
+        .panel,
+        .modal,
+        .toast {
+            position: relative;
+        }
+
+        .hero-card::after,
+        .metric::after,
+        .panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            width: auto;
+            height: auto;
+            border-radius: inherit;
+            pointer-events: none;
+            background:
+                    radial-gradient(circle at var(--card-x, 50%) var(--card-y, 0%), rgba(255, 255, 255, 0.72), transparent 18%),
+                    linear-gradient(135deg, rgba(255, 255, 255, 0.36), transparent 44%);
+            opacity: 0;
+            transition: opacity 0.24s ease;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            padding: 1px;
+        }
+
+        .hero-card:hover::after,
+        .metric:hover::after,
+        .panel:hover::before {
+            opacity: 1;
+        }
+
+        .hero-card {
+            min-height: 390px;
+            border-color: var(--hairline);
+            border-radius: 34px;
+            background: var(--glass);
+            box-shadow: 0 36px 100px rgba(24, 51, 45, 0.20), var(--inner-light);
+            backdrop-filter: blur(26px) saturate(1.12);
+        }
+
+        .hero-card::before {
+            opacity: 1;
+            background:
+                    radial-gradient(circle at var(--spotlight-x, 68%) var(--spotlight-y, 22%), rgba(47, 128, 237, 0.28), transparent 26%),
+                    radial-gradient(circle at 16% 20%, rgba(214, 168, 79, 0.15), transparent 26%),
+                    linear-gradient(135deg, rgba(15, 118, 98, 0.22), rgba(255, 255, 255, 0));
+        }
+
+        .hero-copy {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.70), transparent 86%);
+        }
+
+        .hero-copy span {
+            width: fit-content;
+            border: 1px solid rgba(15, 118, 98, 0.16);
+            border-radius: 999px;
+            padding: 7px 10px;
+            color: var(--brand);
+            background: rgba(255, 255, 255, 0.60);
+            box-shadow: var(--inner-light);
+        }
+
+        .hero-copy h3 {
+            font-weight: 820;
+            letter-spacing: 0;
+        }
+
+        .hero-actions button,
+        .actions button,
+        .panel-header button {
+            min-height: 40px;
+        }
+
+        .hero-chip {
+            border-color: rgba(255, 255, 255, 0.74);
+            background: rgba(255, 255, 255, 0.66);
+            backdrop-filter: blur(14px);
+        }
+
+        .hero-image {
+            min-height: 360px;
+        }
+
+        .hero-image img {
+            transition: transform 0.5s ease, filter 0.5s ease;
+        }
+
+        .hero-card:hover .hero-image img {
+            transform: scale(1.035);
+            filter: saturate(1.12) contrast(1.04);
+        }
+
+        .dashboard {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: minmax(128px, auto);
+            gap: 18px;
+        }
+
+        .metric {
+            border-color: var(--hairline);
+            border-radius: 28px;
+            padding: 22px;
+            background:
+                    linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.58)),
+                    radial-gradient(circle at 84% 18%, rgba(47, 128, 237, 0.12), transparent 32%);
+            box-shadow: var(--shadow-soft), var(--inner-light);
+            backdrop-filter: blur(20px) saturate(1.12);
+        }
+
+        .metric:nth-child(1) {
+            grid-column: span 1;
+            background:
+                    linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.60)),
+                    radial-gradient(circle at 88% 18%, rgba(15, 118, 98, 0.17), transparent 34%);
+        }
+
+        .metric:nth-child(3) {
+            grid-column: span 1;
+            background:
+                    linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.58)),
+                    radial-gradient(circle at 86% 18%, rgba(214, 168, 79, 0.18), transparent 34%);
+        }
+
+        .metric::before {
+            inset: auto 22px 18px 22px;
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(15, 118, 98, 0.96), rgba(47, 128, 237, 0.90), rgba(214, 168, 79, 0.88));
+            opacity: 0.86;
+        }
+
+        .metric::after {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.66), transparent 62%);
+        }
+
+        .metric span {
+            font-weight: 620;
+        }
+
+        .metric strong {
+            margin-top: 10px;
+            font-size: clamp(32px, 3vw, 44px);
+            font-weight: 820;
+        }
+
+        body.is-loading .metric strong {
+            width: 72px;
+            height: 42px;
+            border-radius: 14px;
+            color: transparent;
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0.45), rgba(47, 128, 237, 0.16), rgba(255, 255, 255, 0.45));
+            background-size: 220% 100%;
+            animation: skeleton 1.1s ease-in-out infinite;
+        }
+
+        .panel {
+            border-color: var(--hairline);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: var(--shadow-soft), var(--inner-light);
+            backdrop-filter: blur(24px) saturate(1.14);
+        }
+
+        .panel-header {
+            padding: 18px 20px;
+            border-bottom-color: rgba(255, 255, 255, 0.58);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.36));
+        }
+
+        .panel-header h3 {
+            font-size: 19px;
+            font-weight: 740;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        .panel-body.editing-target {
+            border-radius: 0 0 24px 24px;
+        }
+
+        .form-grid {
+            gap: 16px;
+        }
+
+        label {
+            font-weight: 620;
+            transition: color 0.18s ease, transform 0.18s ease;
+        }
+
+        label:focus-within {
+            color: var(--brand);
+            transform: translateY(-1px);
+        }
+
+        input,
+        select,
+        textarea {
+            border-color: rgba(255, 255, 255, 0.72);
+            border-radius: 16px;
+            padding: 12px 13px;
+            background: rgba(255, 255, 255, 0.70);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 0;
+            border-color: rgba(47, 128, 237, 0.48);
+            box-shadow: 0 0 0 5px rgba(47, 128, 237, 0.12), 0 10px 24px rgba(15, 118, 98, 0.10);
+        }
+
+        button.primary,
+        button.secondary,
+        button.danger,
+        .row-actions button,
+        .pagination button {
+            box-shadow: var(--inner-light);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #10856f, #0b5d50 58%, #12483f);
+            box-shadow: 0 14px 28px rgba(15, 118, 98, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        }
+
+        button.primary:hover {
+            background: linear-gradient(135deg, #159b82, #0b5d50 58%, #123f39);
+        }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.68);
+        }
+
+        button.danger {
+            background: rgba(255, 240, 237, 0.78);
+        }
+
+        button:active,
+        .row-actions button:active,
+        .pagination button:active {
+            transform: scale(0.97);
+        }
+
+        .table-toolbar {
+            border-color: rgba(255, 255, 255, 0.56);
+            background: rgba(255, 255, 255, 0.46);
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            min-width: 820px;
+        }
+
+        th {
+            border: 0;
+            padding: 10px 14px;
+            color: var(--muted);
+            background: transparent;
+            font-size: 12px;
+            font-weight: 760;
+        }
+
+        td {
+            border: 0;
+            background: rgba(255, 255, 255, 0.58);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.50);
+            transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        td:first-child {
+            border-radius: 16px 0 0 16px;
+        }
+
+        td:last-child {
+            border-radius: 0 16px 16px 0;
+        }
+
+        tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.86);
+            box-shadow: 0 12px 26px rgba(16, 38, 32, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.64);
+            transform: translateY(-1px);
+        }
+
+        .row-actions button,
+        .pagination button {
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .row-actions button:last-child {
+            background: rgba(255, 240, 237, 0.82);
+        }
+
+        .pagination {
+            background: rgba(255, 255, 255, 0.46);
+        }
+
+        .statistics-grid {
+            gap: 20px;
+        }
+
+        .chart {
+            gap: 14px;
+            border-bottom-color: rgba(255, 255, 255, 0.58);
+        }
+
+        .chart-track {
+            height: 14px;
+            background: rgba(15, 118, 98, 0.10);
+            box-shadow: inset 0 1px 2px rgba(16, 38, 32, 0.06);
+        }
+
+        .chart-bar {
+            background: linear-gradient(90deg, #0f7662, #2f80ed 70%, #d6a84f);
+            box-shadow: 0 0 18px rgba(47, 128, 237, 0.22);
+        }
+
+        .modal {
+            border-color: rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(28px) saturate(1.14);
+        }
+
+        .toast {
+            border-color: rgba(255, 255, 255, 0.70);
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        @keyframes meshDrift {
+            from {
+                transform: translate3d(-1.5%, 1%, 0) scale(1);
+            }
+            to {
+                transform: translate3d(1.5%, -1%, 0) scale(1.04);
+            }
+        }
+
+        @keyframes skeleton {
+            from {
+                background-position: 180% 0;
+            }
+            to {
+                background-position: -40% 0;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #071512;
+                --panel: rgba(15, 31, 28, 0.76);
+                --panel-soft: rgba(17, 38, 34, 0.74);
+                --text: #e9f7f2;
+                --muted: #9bb2aa;
+                --line: rgba(255, 255, 255, 0.10);
+                --brand: #45d3aa;
+                --brand-dark: #159270;
+                --accent: #62a8ff;
+                --accent-soft: rgba(98, 168, 255, 0.16);
+                --danger: #ff8075;
+                --danger-soft: rgba(255, 128, 117, 0.14);
+                --ok: #5de0ad;
+                --sidebar: #071512;
+                --glass: rgba(16, 34, 31, 0.70);
+                --glass-strong: rgba(20, 44, 40, 0.84);
+                --hairline: rgba(255, 255, 255, 0.12);
+                --shadow: 0 30px 90px rgba(0, 0, 0, 0.46);
+                --shadow-soft: 0 16px 42px rgba(0, 0, 0, 0.30);
+                --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+            }
+
+            html {
+                color-scheme: dark;
+            }
+
+            body {
+                background:
+                        radial-gradient(circle at 16% 12%, rgba(214, 168, 79, 0.13), transparent 28%),
+                        radial-gradient(circle at 72% 8%, rgba(98, 168, 255, 0.18), transparent 30%),
+                        radial-gradient(circle at 84% 72%, rgba(69, 211, 170, 0.14), transparent 34%),
+                        linear-gradient(135deg, #071512 0%, #091c1a 46%, #081526 100%);
+            }
+
+            body::before {
+                background-image:
+                        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            }
+
+            .hero-copy {
+                background: linear-gradient(90deg, rgba(11, 27, 24, 0.92), rgba(11, 27, 24, 0.66), transparent 88%);
+            }
+
+            .hero-copy span,
+            .hero-chip,
+            .status,
+            input,
+            select,
+            textarea,
+            td,
+            .row-actions button,
+            .pagination button,
+            .toast,
+            .modal {
+                background-color: rgba(18, 39, 35, 0.74);
+            }
+
+            .hero-image::after {
+                background:
+                        linear-gradient(90deg, rgba(7, 21, 18, 0.84), transparent 42%),
+                        linear-gradient(0deg, rgba(0, 0, 0, 0.26), transparent 44%);
+            }
+
+            .metric,
+            .panel {
+                background:
+                        linear-gradient(145deg, rgba(19, 42, 38, 0.82), rgba(12, 29, 26, 0.70)),
+                        radial-gradient(circle at 84% 18%, rgba(98, 168, 255, 0.10), transparent 32%);
+            }
+
+            .panel-header,
+            .table-toolbar,
+            .pagination {
+                background: rgba(15, 34, 31, 0.58);
+            }
+
+            th {
+                color: var(--muted);
+            }
+
+            tbody tr:hover td {
+                background: rgba(24, 52, 47, 0.90);
+            }
         }
 
         @media (max-width: 980px) {
@@ -459,13 +1521,44 @@
             .status {
                 width: 100%;
             }
+
+            .table-toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .table-summary {
+                text-align: left;
+            }
+
+            .pagination {
+                justify-content: space-between;
+            }
+
+            .toast-stack {
+                top: 12px;
+                right: 12px;
+                left: 12px;
+                width: auto;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
         }
     </style>
 </head>
-<body>
+<body class="is-loading">
 <div class="layout">
     <aside class="sidebar">
         <div class="brand">
+            <div class="brand-badge">Online Workspace</div>
             <h1>企业员工管理系统</h1>
             <p>Department · Employee · Attendance · Salary</p>
         </div>
@@ -478,17 +1571,26 @@
                 <h2 id="pageTitle">部门管理</h2>
                 <p id="pageDesc">维护企业部门主数据。</p>
             </div>
-            <div class="status" id="statusText">等待操作</div>
+            <div class="status" id="statusText" role="status" aria-live="polite">等待操作</div>
         </div>
 
         <section class="hero-card">
             <div class="hero-copy">
                 <span>EMS WORKSPACE</span>
-                <h3>集中维护员工、部门、考勤与薪资数据</h3>
-                <p>这个页面直接连接 Spring Boot 后端接口，适合课堂演示完整的数据库增删改查流程和统计查询结果。</p>
+                <h3>一站式员工数据运营工作台</h3>
+                <p>部门、岗位、员工、考勤和薪资信息集中维护，关键数据实时汇总，日常录入和统计查看都能在同一个界面完成。</p>
+                <div class="hero-actions">
+                    <button class="primary" type="button" data-action="refresh-all">刷新全部数据</button>
+                    <button class="secondary" type="button" data-action="open-statistics">查看统计分析</button>
+                </div>
+                <div class="hero-chip-row">
+                    <span class="hero-chip">实时总览</span>
+                    <span class="hero-chip">快速检索</span>
+                    <span class="hero-chip">中文状态</span>
+                </div>
             </div>
             <div class="hero-image">
-                <img src="/assets/ems-hero.png" alt="企业员工管理系统视觉图">
+                <img src="/assets/ems-hero-premium.png" alt="企业员工管理系统视觉图" width="1635" height="962" loading="lazy" decoding="async">
             </div>
         </section>
 
@@ -503,10 +1605,27 @@
     </main>
 </div>
 
+<div class="toast-stack" id="toastStack" aria-live="assertive" aria-atomic="true"></div>
+
+<div class="modal-backdrop" id="deleteModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" aria-describedby="deleteModalDesc">
+        <h3 id="deleteModalTitle">确认删除</h3>
+        <p id="deleteModalDesc">删除后无法恢复。</p>
+        <div class="actions">
+            <button class="danger" type="button" id="confirmDeleteButton">删除</button>
+            <button class="secondary" type="button" id="cancelDeleteButton">取消</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const state = {
         activeModule: 'departments',
         editing: {},
+        tableState: {},
+        statusTimer: null,
+        toastId: 0,
+        pendingDelete: null,
         data: {
             departments: [],
             positions: [],
@@ -590,7 +1709,7 @@
                 {name: 'hireDate', label: '入职日期'},
                 {name: 'deptId', label: '部门', render: value => findName('departments', 'deptId', 'deptName', value)},
                 {name: 'positionId', label: '岗位', render: value => findName('positions', 'positionId', 'positionName', value)},
-                {name: 'status', label: '状态'},
+                {name: 'status', label: '状态', render: formatEmployeeStatus},
                 {name: 'leaveDate', label: '离职日期'}
             ]
         },
@@ -612,7 +1731,7 @@
                 {name: 'attendanceId', label: 'ID'},
                 {name: 'empId', label: '员工', render: value => findName('employees', 'empId', 'empName', value)},
                 {name: 'attendanceDate', label: '日期'},
-                {name: 'attendanceStatus', label: '状态'},
+                {name: 'attendanceStatus', label: '状态', render: formatAttendanceStatus},
                 {name: 'lateMinutes', label: '迟到分钟'},
                 {name: 'overtimeHours', label: '加班小时'},
                 {name: 'remark', label: '备注'}
@@ -650,18 +1769,107 @@
         desc: '查看部门和岗位维度的员工人数。'
     };
 
+    const employeeStatusLabels = {
+        active: '在职',
+        probation: '试用期',
+        resigned: '离职'
+    };
+
+    const attendanceStatusLabels = {
+        present: '出勤',
+        late: '迟到',
+        leave: '请假',
+        absent: '缺勤'
+    };
+
+    const PAGE_SIZES = [5, 10, 20, 50];
+    const DEFAULT_STATUS = '等待操作';
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function escapeAttr(value) {
+        return escapeHtml(value);
+    }
+
+    function formatEmployeeStatus(value) {
+        return employeeStatusLabels[value] || value;
+    }
+
+    function formatAttendanceStatus(value) {
+        return attendanceStatusLabels[value] || value;
+    }
+
     function setStatus(message, type = '') {
         const status = document.getElementById('statusText');
+        window.clearTimeout(state.statusTimer);
         status.textContent = message;
-        status.className = `status ${type}`;
+        status.className = `status ${type}`.trim();
+        if (type === 'error') {
+            showToast('操作失败', message, 'error');
+        }
+        if (type === 'success') {
+            state.statusTimer = window.setTimeout(() => {
+                status.textContent = DEFAULT_STATUS;
+                status.className = 'status';
+            }, 2600);
+        }
+    }
+
+    function showToast(title, message, type = 'error') {
+        const stack = document.getElementById('toastStack');
+        const toast = document.createElement('div');
+        const id = `toast-${++state.toastId}`;
+        toast.className = `toast ${type}`;
+        toast.id = id;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.innerHTML = `
+            <div>
+                <strong>${escapeHtml(title)}</strong>
+                <span>${escapeHtml(message || '请稍后重试')}</span>
+            </div>
+            <button type="button" aria-label="关闭提醒" data-toast-close="${id}">×</button>
+        `;
+        stack.appendChild(toast);
+
+        const close = () => toast.remove();
+        toast.querySelector('button').addEventListener('click', close);
+        window.setTimeout(close, type === 'error' ? 7000 : 3200);
     }
 
     async function request(url, options = {}) {
+        const {headers = {}, ...requestOptions} = options;
         const response = await fetch(url, {
-            headers: {'Content-Type': 'application/json', ...(options.headers || {})},
-            ...options
+            ...requestOptions,
+            headers: {
+                Accept: 'application/json',
+                ...(requestOptions.body ? {'Content-Type': 'application/json'} : {}),
+                ...headers
+            }
         });
-        const result = await response.json();
+        const text = await response.text();
+        let result = null;
+
+        if (text) {
+            try {
+                result = JSON.parse(text);
+            } catch (error) {
+                throw new Error(response.ok ? '响应格式异常' : `请求失败（HTTP ${response.status}）`);
+            }
+        }
+
+        if (!response.ok) {
+            throw new Error(result?.message || `请求失败（HTTP ${response.status}）`);
+        }
+        if (!result) {
+            return null;
+        }
         if (result.code !== 0) {
             throw new Error(result.message || '请求失败');
         }
@@ -673,14 +1881,33 @@
         return row ? row[nameField] : id;
     }
 
+    function getModule(key) {
+        return modules.find(item => item.key === key);
+    }
+
+    function getTableState(moduleKey) {
+        if (!state.tableState[moduleKey]) {
+            state.tableState[moduleKey] = {
+                search: '',
+                column: 'all',
+                page: 1,
+                pageSize: 10
+            };
+        }
+        return state.tableState[moduleKey];
+    }
+
     function renderNavigation() {
         const nav = document.getElementById('nav');
         const allModules = [...modules, statisticsModule];
-        nav.innerHTML = allModules.map(item => `
-            <button type="button" class="${item.key === state.activeModule ? 'active' : ''}" data-module="${item.key}">
-                ${item.title}
-            </button>
-        `).join('');
+        nav.innerHTML = allModules.map(item => {
+            const active = item.key === state.activeModule;
+            return `
+                <button type="button" class="${active ? 'active' : ''}" data-module="${escapeAttr(item.key)}" ${active ? 'aria-current="page"' : ''}>
+                    ${escapeHtml(item.title)}
+                </button>
+            `;
+        }).join('');
 
         nav.querySelectorAll('button').forEach(button => {
             button.addEventListener('click', () => switchModule(button.dataset.module));
@@ -697,78 +1924,101 @@
         modules.forEach(module => {
             const form = document.getElementById(`${module.key}Form`);
             form.addEventListener('submit', event => submitForm(event, module));
+            form.addEventListener('invalid', event => reportInvalidField(event, module), true);
             document.getElementById(`${module.key}Cancel`).addEventListener('click', () => resetForm(module));
             renderTable(module);
         });
+        bindSectionActions();
+        bindDeleteDialog();
         renderStatisticsTables();
     }
 
     function renderCrudSection(module) {
         return `
-            <section class="section ${module.key === state.activeModule ? 'active' : ''}" id="${module.key}Section">
+            <section class="section ${module.key === state.activeModule ? 'active' : ''}" id="${escapeAttr(module.key)}Section">
                 <div class="panel">
                     <div class="panel-header">
-                        <h3>${module.title}</h3>
-                        <button class="secondary" type="button" onclick="refreshModule('${module.key}')">刷新列表</button>
+                        <h3>${escapeHtml(module.title)}</h3>
+                        <button class="secondary" type="button" data-action="refresh-module" data-module="${escapeAttr(module.key)}">刷新列表</button>
                     </div>
                     <div class="panel-body">
-                        <form id="${module.key}Form">
+                        <form id="${escapeAttr(module.key)}Form">
                             <div class="form-grid">
                                 ${module.fields.map(field => renderField(module, field)).join('')}
                             </div>
                             <div class="actions">
-                                <button class="primary" type="submit" id="${module.key}Submit">新增</button>
-                                <button class="secondary" type="button" id="${module.key}Cancel">清空</button>
+                                <button class="primary" type="submit" id="${escapeAttr(module.key)}Submit">新增</button>
+                                <button class="secondary" type="button" id="${escapeAttr(module.key)}Cancel">清空</button>
                             </div>
                         </form>
                     </div>
+                    ${renderTableToolbar(module)}
                     <div class="table-wrap">
-                        <table>
+                        <table aria-describedby="${escapeAttr(module.key)}Summary">
                             <thead>
                             <tr>
-                                ${module.columns.map(column => `<th>${column.label}</th>`).join('')}
+                                ${module.columns.map(column => `<th>${escapeHtml(column.label)}</th>`).join('')}
                                 <th>操作</th>
                             </tr>
                             </thead>
-                            <tbody id="${module.key}Table"></tbody>
+                            <tbody id="${escapeAttr(module.key)}Table"></tbody>
                         </table>
                     </div>
+                    <div class="pagination" id="${escapeAttr(module.key)}Pagination"></div>
                 </div>
             </section>
         `;
     }
 
+    function renderTableToolbar(module) {
+        const table = getTableState(module.key);
+        return `
+            <div class="table-toolbar" data-module="${escapeAttr(module.key)}">
+                <label class="visually-hidden" for="${escapeAttr(module.key)}Search">搜索${escapeHtml(module.title)}</label>
+                <input id="${escapeAttr(module.key)}Search" type="search" value="${escapeAttr(table.search)}" placeholder="搜索${escapeAttr(module.title)}" data-action="table-search" data-module="${escapeAttr(module.key)}">
+                <select aria-label="筛选字段" data-action="table-column" data-module="${escapeAttr(module.key)}">
+                    <option value="all">全部字段</option>
+                    ${module.columns.map(column => `<option value="${escapeAttr(column.name)}" ${table.column === column.name ? 'selected' : ''}>${escapeHtml(column.label)}</option>`).join('')}
+                </select>
+                <select aria-label="每页条数" data-action="table-page-size" data-module="${escapeAttr(module.key)}">
+                    ${PAGE_SIZES.map(size => `<option value="${size}" ${table.pageSize === size ? 'selected' : ''}>每页 ${size} 条</option>`).join('')}
+                </select>
+                <span class="table-summary" id="${escapeAttr(module.key)}Summary">共 0 条</span>
+            </div>
+        `;
+    }
+
     function renderField(module, field) {
         const required = field.required ? 'required' : '';
-        const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : '';
+        const placeholder = field.placeholder ? `placeholder="${escapeAttr(field.placeholder)}"` : '';
         let input;
 
         if (field.type === 'select') {
             input = `
-                <select name="${field.name}" ${required}>
+                <select name="${escapeAttr(field.name)}" ${required}>
                     <option value="">请选择</option>
-                    ${field.options.map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}
+                    ${field.options.map(([value, label]) => `<option value="${escapeAttr(value)}">${escapeHtml(label)}</option>`).join('')}
                 </select>
             `;
         } else if (field.type === 'department') {
-            input = `<select name="${field.name}" ${required} data-source="departments"></select>`;
+            input = `<select name="${escapeAttr(field.name)}" ${required} data-source="departments"></select>`;
         } else if (field.type === 'position') {
-            input = `<select name="${field.name}" ${required} data-source="positions"></select>`;
+            input = `<select name="${escapeAttr(field.name)}" ${required} data-source="positions"></select>`;
         } else if (field.type === 'employee') {
-            input = `<select name="${field.name}" ${required} data-source="employees"></select>`;
+            input = `<select name="${escapeAttr(field.name)}" ${required} data-source="employees"></select>`;
         } else {
             input = `
                 <input
-                    name="${field.name}"
-                    type="${field.type || 'text'}"
-                    step="${field.step || ''}"
+                    name="${escapeAttr(field.name)}"
+                    type="${escapeAttr(field.type || 'text')}"
+                    ${field.step ? `step="${escapeAttr(field.step)}"` : ''}
                     ${placeholder}
                     ${required}
                 >
             `;
         }
 
-        return `<label>${field.label}${input}</label>`;
+        return `<label>${escapeHtml(field.label)}${input}</label>`;
     }
 
     function renderStatisticsSection() {
@@ -786,10 +2036,10 @@
         return `
             <div class="panel">
                 <div class="panel-header">
-                    <h3>${title}</h3>
-                    <button class="secondary" type="button" onclick="refreshStatistics()">刷新统计</button>
+                    <h3>${escapeHtml(title)}</h3>
+                    <button class="secondary" type="button" data-action="refresh-statistics">刷新统计</button>
                 </div>
-                <div class="chart" id="${chartId}"></div>
+                <div class="chart" id="${escapeAttr(chartId)}"></div>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -799,7 +2049,7 @@
                             <th>员工人数</th>
                         </tr>
                         </thead>
-                        <tbody id="${tableId}"></tbody>
+                        <tbody id="${escapeAttr(tableId)}"></tbody>
                     </table>
                 </div>
             </div>
@@ -812,37 +2062,76 @@
             const value = select.value;
             let options = '<option value="">请选择</option>';
             if (source === 'departments') {
-                options += state.data.departments.map(item => `<option value="${item.deptId}">${item.deptName}</option>`).join('');
+                options += state.data.departments.map(item => `<option value="${escapeAttr(item.deptId)}">${escapeHtml(item.deptName)}</option>`).join('');
             }
             if (source === 'positions') {
-                options += state.data.positions.map(item => `<option value="${item.positionId}">${item.positionName}</option>`).join('');
+                options += state.data.positions.map(item => `<option value="${escapeAttr(item.positionId)}">${escapeHtml(item.positionName)}</option>`).join('');
             }
             if (source === 'employees') {
-                options += state.data.employees.map(item => `<option value="${item.empId}">${item.empName}</option>`).join('');
+                options += state.data.employees.map(item => `<option value="${escapeAttr(item.empId)}">${escapeHtml(item.empName)}</option>`).join('');
             }
             select.innerHTML = options;
             select.value = value;
         });
     }
 
+    function getCellValue(module, column, row) {
+        const raw = row[column.name];
+        return column.render ? column.render(raw, row) : raw;
+    }
+
+    function getFilteredRows(module) {
+        const table = getTableState(module.key);
+        const query = table.search.trim().toLowerCase();
+        if (!query) {
+            return state.data[module.key];
+        }
+
+        const columns = table.column === 'all'
+            ? module.columns
+            : module.columns.filter(column => column.name === table.column);
+
+        return state.data[module.key].filter(row => columns.some(column => {
+            const value = getCellValue(module, column, row);
+            return String(value ?? '').toLowerCase().includes(query);
+        }));
+    }
+
     function renderTable(module) {
         const tbody = document.getElementById(`${module.key}Table`);
-        const rows = state.data[module.key];
-        tbody.innerHTML = rows.length ? rows.map(row => `
-            <tr>
-                ${module.columns.map(column => {
-                    const raw = row[column.name];
-                    const value = column.render ? column.render(raw, row) : raw;
-                    return `<td>${value ?? ''}</td>`;
-                }).join('')}
-                <td>
-                    <div class="row-actions">
-                        <button type="button" onclick="editRow('${module.key}', ${row[module.idField]})">编辑</button>
-                        <button type="button" onclick="deleteRow('${module.key}', ${row[module.idField]})">删除</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('') : `<tr><td colspan="${module.columns.length + 1}">暂无数据</td></tr>`;
+        const pagination = document.getElementById(`${module.key}Pagination`);
+        const summary = document.getElementById(`${module.key}Summary`);
+        const table = getTableState(module.key);
+        const rows = getFilteredRows(module);
+        const totalPages = Math.max(Math.ceil(rows.length / table.pageSize), 1);
+
+        table.page = Math.min(Math.max(table.page, 1), totalPages);
+        const start = (table.page - 1) * table.pageSize;
+        const pageRows = rows.slice(start, start + table.pageSize);
+
+        tbody.innerHTML = pageRows.length ? pageRows.map(row => {
+            const id = row[module.idField];
+            return `
+                <tr>
+                    ${module.columns.map(column => `<td>${escapeHtml(getCellValue(module, column, row))}</td>`).join('')}
+                    <td>
+                        <div class="row-actions">
+                            <button type="button" data-action="edit-row" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">编辑</button>
+                            <button type="button" data-action="delete-row" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">删除</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('') : `<tr><td colspan="${module.columns.length + 1}">${state.data[module.key].length ? '没有匹配数据' : '暂无数据'}</td></tr>`;
+
+        const shownStart = rows.length ? start + 1 : 0;
+        const shownEnd = rows.length ? Math.min(start + table.pageSize, rows.length) : 0;
+        summary.textContent = `共 ${rows.length} 条，显示 ${shownStart}-${shownEnd} 条`;
+        pagination.innerHTML = `
+            <button type="button" data-action="table-prev" data-module="${escapeAttr(module.key)}" ${table.page <= 1 ? 'disabled' : ''}>上一页</button>
+            <span>第 ${table.page} / ${totalPages} 页</span>
+            <button type="button" data-action="table-next" data-module="${escapeAttr(module.key)}" ${table.page >= totalPages ? 'disabled' : ''}>下一页</button>
+        `;
     }
 
     function renderStatisticsTables() {
@@ -859,9 +2148,9 @@
     function renderStatisticsRows(rows) {
         return rows.length ? rows.map(row => `
             <tr>
-                <td>${row.id}</td>
-                <td>${row.name}</td>
-                <td>${row.employeeCount}</td>
+                <td>${escapeHtml(row.id)}</td>
+                <td>${escapeHtml(row.name)}</td>
+                <td>${escapeHtml(row.employeeCount)}</td>
             </tr>
         `).join('') : '<tr><td colspan="3">暂无数据</td></tr>';
     }
@@ -876,21 +2165,47 @@
             const width = Math.max((count / max) * 100, count > 0 ? 8 : 0);
             return `
                 <div class="chart-row">
-                    <span class="chart-name" title="${row.name}">${row.name}</span>
+                    <span class="chart-name" title="${escapeAttr(row.name)}">${escapeHtml(row.name)}</span>
                     <div class="chart-track">
                         <div class="chart-bar" style="width: ${width}%"></div>
                     </div>
-                    <span class="chart-count">${count}</span>
+                    <span class="chart-count">${escapeHtml(count)}</span>
                 </div>
             `;
         }).join('');
     }
 
     function renderMetrics() {
-        document.getElementById('metricDepartments').textContent = state.data.departments.length;
-        document.getElementById('metricPositions').textContent = state.data.positions.length;
-        document.getElementById('metricEmployees').textContent = state.data.employees.length;
-        document.getElementById('metricAttendance').textContent = state.data.attendance.length;
+        animateNumber(document.getElementById('metricDepartments'), state.data.departments.length);
+        animateNumber(document.getElementById('metricPositions'), state.data.positions.length);
+        animateNumber(document.getElementById('metricEmployees'), state.data.employees.length);
+        animateNumber(document.getElementById('metricAttendance'), state.data.attendance.length);
+    }
+
+    function animateNumber(element, target) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const start = Number(element.dataset.value || element.textContent || 0);
+        const end = Number(target) || 0;
+        element.dataset.value = String(end);
+
+        if (reduceMotion || start === end) {
+            element.textContent = end;
+            return;
+        }
+
+        const startedAt = performance.now();
+        const duration = 520;
+
+        function frame(now) {
+            const progress = Math.min((now - startedAt) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            element.textContent = Math.round(start + (end - start) * eased);
+            if (progress < 1) {
+                requestAnimationFrame(frame);
+            }
+        }
+
+        requestAnimationFrame(frame);
     }
 
     function switchModule(key) {
@@ -923,8 +2238,21 @@
         return payload;
     }
 
+    function reportInvalidField(event, module) {
+        const field = module.fields.find(item => item.name === event.target.name);
+        const label = field ? field.label : '表单字段';
+        const message = event.target.validity.valueMissing
+            ? `请填写「${label}」后再提交。`
+            : `请检查「${label}」的输入格式。`;
+        setStatus(message, 'error');
+    }
+
     async function submitForm(event, module) {
         event.preventDefault();
+        if (!event.target.checkValidity()) {
+            event.target.reportValidity();
+            return;
+        }
         const id = state.editing[module.key];
         const payload = readPayload(module);
         const url = id ? `${module.endpoint}/${id}` : module.endpoint;
@@ -935,14 +2263,14 @@
             setStatus(id ? '修改成功' : '新增成功', 'success');
             resetForm(module);
             await refreshModule(module.key);
-            await refreshStatistics();
+            await refreshStatistics(false);
         } catch (error) {
             setStatus(error.message, 'error');
         }
     }
 
     function editRow(moduleKey, id) {
-        const module = modules.find(item => item.key === moduleKey);
+        const module = getModule(moduleKey);
         const row = state.data[module.key].find(item => Number(item[module.idField]) === Number(id));
         if (!row) {
             setStatus('未找到要编辑的数据', 'error');
@@ -960,20 +2288,68 @@
         state.editing[module.key] = id;
         document.getElementById(`${module.key}Submit`).textContent = '保存修改';
         setStatus(`正在编辑 ${module.title} ID: ${id}`);
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        scrollToEditForm(module);
     }
 
-    async function deleteRow(moduleKey, id) {
-        const module = modules.find(item => item.key === moduleKey);
-        if (!confirm(`确认删除 ${module.title} ID: ${id} 吗？`)) {
+    function scrollToEditForm(module) {
+        const form = document.getElementById(`${module.key}Form`);
+        const panelBody = form.closest('.panel-body');
+        const firstField = form.querySelector('input, select, textarea');
+        const topbar = document.querySelector('.topbar');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const stickyOffset = (topbar?.getBoundingClientRect().height || 0) + 18;
+        const targetTop = panelBody.getBoundingClientRect().top + window.scrollY - stickyOffset;
+
+        panelBody.classList.remove('editing-target');
+        void panelBody.offsetWidth;
+        panelBody.classList.add('editing-target');
+
+        window.scrollTo({
+            top: Math.max(targetTop, 0),
+            behavior: reduceMotion ? 'auto' : 'smooth'
+        });
+
+        window.setTimeout(() => {
+            firstField?.focus({preventScroll: true});
+            panelBody.classList.remove('editing-target');
+        }, reduceMotion ? 0 : 420);
+    }
+
+    function describeRow(module, id) {
+        const row = state.data[module.key].find(item => Number(item[module.idField]) === Number(id));
+        if (!row) {
+            return `${module.title} ID: ${id}`;
+        }
+        const nameColumn = module.columns.find(column => /name/i.test(column.name)) || module.columns[1] || module.columns[0];
+        return `${module.title}「${getCellValue(module, nameColumn, row) ?? id}」`;
+    }
+
+    function deleteRow(moduleKey, id) {
+        const module = getModule(moduleKey);
+        state.pendingDelete = {moduleKey, id};
+        document.getElementById('deleteModalDesc').textContent = `确认删除 ${describeRow(module, id)} 吗？删除后无法恢复。`;
+        document.getElementById('deleteModal').hidden = false;
+        document.getElementById('confirmDeleteButton').focus();
+    }
+
+    function closeDeleteDialog() {
+        state.pendingDelete = null;
+        document.getElementById('deleteModal').hidden = true;
+    }
+
+    async function confirmDelete() {
+        if (!state.pendingDelete) {
             return;
         }
+        const {moduleKey, id} = state.pendingDelete;
+        const module = getModule(moduleKey);
 
         try {
             await request(`${module.endpoint}/${id}`, {method: 'DELETE'});
+            closeDeleteDialog();
             setStatus('删除成功', 'success');
             await refreshModule(module.key);
-            await refreshStatistics();
+            await refreshStatistics(false);
         } catch (error) {
             setStatus(error.message, 'error');
         }
@@ -987,7 +2363,7 @@
     }
 
     async function refreshModule(key) {
-        const module = modules.find(item => item.key === key);
+        const module = getModule(key);
         try {
             state.data[key] = await request(module.endpoint);
             renderDependentSelects();
@@ -999,38 +2375,176 @@
         }
     }
 
-    async function refreshStatistics() {
+    async function loadStatisticsData() {
+        const [byDepartment, byPosition] = await Promise.all([
+            request('/api/statistics/employees-by-department'),
+            request('/api/statistics/employees-by-position')
+        ]);
+        state.data.statisticsByDepartment = byDepartment;
+        state.data.statisticsByPosition = byPosition;
+        renderStatisticsTables();
+    }
+
+    async function refreshStatistics(showStatus = true) {
         try {
-            const [byDepartment, byPosition] = await Promise.all([
-                request('/api/statistics/employees-by-department'),
-                request('/api/statistics/employees-by-position')
-            ]);
-            state.data.statisticsByDepartment = byDepartment;
-            state.data.statisticsByPosition = byPosition;
-            renderStatisticsTables();
+            await loadStatisticsData();
+            if (showStatus) {
+                setStatus('统计已刷新', 'success');
+            }
         } catch (error) {
             setStatus(error.message, 'error');
+            throw error;
         }
     }
 
     async function loadAll() {
+        document.body.classList.add('is-loading');
         setStatus('正在加载数据......');
         try {
-            for (const module of modules) {
-                state.data[module.key] = await request(module.endpoint);
-            }
-            await refreshStatistics();
+            const [moduleResults] = await Promise.all([
+                Promise.all(modules.map(module => request(module.endpoint))),
+                loadStatisticsData()
+            ]);
+            modules.forEach((module, index) => {
+                state.data[module.key] = moduleResults[index];
+            });
             renderDependentSelects();
             modules.forEach(renderTable);
             renderMetrics();
             setStatus('数据加载完成', 'success');
         } catch (error) {
             setStatus(error.message, 'error');
+        } finally {
+            document.body.classList.remove('is-loading');
         }
+    }
+
+    function bindSectionActions() {
+        const container = document.getElementById('sections');
+        container.addEventListener('input', event => {
+            if (event.target.dataset.action !== 'table-search') {
+                return;
+            }
+            const module = getModule(event.target.dataset.module);
+            const table = getTableState(module.key);
+            table.search = event.target.value;
+            table.page = 1;
+            renderTable(module);
+        });
+
+        container.addEventListener('change', event => {
+            const action = event.target.dataset.action;
+            const module = getModule(event.target.dataset.module);
+            if (!module) {
+                return;
+            }
+            const table = getTableState(module.key);
+            if (action === 'table-column') {
+                table.column = event.target.value;
+                table.page = 1;
+                renderTable(module);
+            }
+            if (action === 'table-page-size') {
+                table.pageSize = Number(event.target.value);
+                table.page = 1;
+                renderTable(module);
+            }
+        });
+
+        container.addEventListener('click', event => {
+            const button = event.target.closest('button[data-action]');
+            if (!button) {
+                return;
+            }
+
+            const action = button.dataset.action;
+            const module = getModule(button.dataset.module);
+            if (action === 'refresh-statistics') {
+                refreshStatistics().catch(() => {});
+                return;
+            }
+            if (!module) {
+                return;
+            }
+            if (action === 'refresh-module') {
+                refreshModule(module.key);
+            }
+            if (action === 'edit-row') {
+                editRow(module.key, button.dataset.id);
+            }
+            if (action === 'delete-row') {
+                deleteRow(module.key, button.dataset.id);
+            }
+            if (action === 'table-prev' || action === 'table-next') {
+                const table = getTableState(module.key);
+                table.page += action === 'table-prev' ? -1 : 1;
+                renderTable(module);
+            }
+        });
+    }
+
+    function bindDeleteDialog() {
+        document.getElementById('confirmDeleteButton').addEventListener('click', confirmDelete);
+        document.getElementById('cancelDeleteButton').addEventListener('click', closeDeleteDialog);
+        document.getElementById('deleteModal').addEventListener('click', event => {
+            if (event.target.id === 'deleteModal') {
+                closeDeleteDialog();
+            }
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !document.getElementById('deleteModal').hidden) {
+                closeDeleteDialog();
+            }
+        });
+    }
+
+    function bindGlobalActions() {
+        document.addEventListener('click', event => {
+            const button = event.target.closest('button[data-action]');
+            if (!button) {
+                return;
+            }
+            if (button.dataset.action === 'refresh-all') {
+                loadAll();
+            }
+            if (button.dataset.action === 'open-statistics') {
+                switchModule('statistics');
+                document.getElementById('statisticsSection').scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
+        });
+    }
+
+    function enhanceHeroSpotlight() {
+        const hero = document.querySelector('.hero-card');
+        if (!hero) {
+            return;
+        }
+        hero.addEventListener('pointermove', event => {
+            const rect = hero.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            hero.style.setProperty('--spotlight-x', `${x}%`);
+            hero.style.setProperty('--spotlight-y', `${y}%`);
+        });
+    }
+
+    function enhanceSurfaceGlow() {
+        document.querySelectorAll('.hero-card, .metric, .panel').forEach(surface => {
+            surface.addEventListener('pointermove', event => {
+                const rect = surface.getBoundingClientRect();
+                const x = ((event.clientX - rect.left) / rect.width) * 100;
+                const y = ((event.clientY - rect.top) / rect.height) * 100;
+                surface.style.setProperty('--card-x', `${x}%`);
+                surface.style.setProperty('--card-y', `${y}%`);
+            });
+        });
     }
 
     renderNavigation();
     renderSections();
+    bindGlobalActions();
+    enhanceHeroSpotlight();
+    enhanceSurfaceGlow();
     loadAll();
 </script>
 </body>
