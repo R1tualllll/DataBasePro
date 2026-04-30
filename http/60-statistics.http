@@ -6,3 +6,18 @@ Accept: application/json
 ### Count employees by position
 GET {{baseUrl}}/api/statistics/employees-by-position
 Accept: application/json
+
+###
+### Get monthly attendance statistics
+GET {{baseUrl}}/api/statistics/monthly-attendance?month=2026-04
+Accept: application/json
+
+###
+### Get dashboard statistics
+GET {{baseUrl}}/api/statistics/dashboard?month=2026-04
+Accept: application/json
+
+###
+### Export monthly attendance CSV
+GET {{baseUrl}}/api/export/monthly-attendance.csv?month=2026-04
+Accept: text/csv

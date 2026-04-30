@@ -3,6 +3,16 @@ GET {{baseUrl}}/api/employees
 Accept: application/json
 
 ###
+### Search employees with server-side filters and pagination
+GET {{baseUrl}}/api/employees/search?keyword=Li&deptId=1&positionId=1&status=active&page=1&pageSize=10
+Accept: application/json
+
+###
+### Get employee detail
+GET {{baseUrl}}/api/employees/1/detail
+Accept: application/json
+
+###
 ### Create employee
 ### Change phone/email before re-running to avoid unique constraint conflicts.
 POST {{baseUrl}}/api/employees
@@ -43,7 +53,29 @@ Accept: application/json
 }
 
 ###
+### Regularize probation employee
+### Replace 3 with an employee whose status is probation.
+PUT {{baseUrl}}/api/employees/3/regularize
+Accept: application/json
+
+###
+### Resign employee
+### Replace 3 with the actual empId.
+PUT {{baseUrl}}/api/employees/3/resign
+Content-Type: application/json
+Accept: application/json
+
+{
+  "leaveDate": "2026-05-31"
+}
+
+###
 ### Delete employee
 ### Replace 3 with the actual empId you want to delete.
 DELETE {{baseUrl}}/api/employees/3
 Accept: application/json
+
+###
+### Export employees CSV
+GET {{baseUrl}}/api/export/employees.csv
+Accept: text/csv

@@ -39,6 +39,9 @@ public class PositionService {
 
     public void deletePosition(Integer positionId) {
         validatePositionId(positionId);
+        if (positionRepository.countEmployees(positionId) > 0) {
+            throw new BusinessException("该岗位下还有员工，不能删除");
+        }
 
         int rows = positionRepository.delete(positionId);
         if (rows == 0) {

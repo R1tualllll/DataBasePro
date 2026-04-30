@@ -3,6 +3,11 @@ GET {{baseUrl}}/api/attendance
 Accept: application/json
 
 ###
+### Search attendance with filters and pagination
+GET {{baseUrl}}/api/attendance/search?empId=1&month=2026-04&status=late&page=1&pageSize=10
+Accept: application/json
+
+###
 ### Create attendance
 ### Change empId/attendanceDate combination before re-running to avoid unique constraint conflicts.
 POST {{baseUrl}}/api/attendance
@@ -39,3 +44,8 @@ Accept: application/json
 ### Replace 1 with the actual attendanceId you want to delete.
 DELETE {{baseUrl}}/api/attendance/6
 Accept: application/json
+
+###
+### Export attendance CSV
+GET {{baseUrl}}/api/export/attendance.csv
+Accept: text/csv

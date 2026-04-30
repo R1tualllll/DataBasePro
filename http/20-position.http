@@ -37,3 +37,8 @@ Accept: application/json
 ### Replace 3 with the actual positionId you want to delete.
 DELETE {{baseUrl}}/api/positions/3
 Accept: application/json
+
+###
+### Export positions CSV
+GET {{baseUrl}}/api/export/positions.csv
+Accept: text/csv

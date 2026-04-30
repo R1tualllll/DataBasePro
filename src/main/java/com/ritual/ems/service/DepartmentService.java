@@ -38,6 +38,9 @@ public class DepartmentService {
 
     public void deleteDepartment(Integer deptId) {
         validateDepartmentId(deptId);
+        if (departmentRepository.countEmployees(deptId) > 0) {
+            throw new BusinessException("该部门下还有员工，不能删除");
+        }
 
         int rows = departmentRepository.delete(deptId);
         if (rows == 0) {

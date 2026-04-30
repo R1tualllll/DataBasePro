@@ -212,6 +212,40 @@
             margin-bottom: 22px;
         }
 
+        .dashboard-detail {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .compact-list {
+            display: grid;
+            gap: 10px;
+            padding: 18px;
+        }
+
+        .compact-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 10px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .compact-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .compact-item strong {
+            color: var(--text);
+            font-size: 14px;
+        }
+
         .hero-card {
             position: relative;
             display: grid;
@@ -534,6 +568,18 @@
             background: rgba(251, 253, 251, 0.86);
         }
 
+        .table-toolbar.employee-toolbar {
+            grid-template-columns: minmax(180px, 1fr) minmax(130px, 170px) minmax(130px, 170px) minmax(110px, 140px) minmax(110px, 140px) auto;
+        }
+
+        .table-toolbar.attendance-toolbar {
+            grid-template-columns: minmax(130px, 170px) minmax(110px, 140px) minmax(110px, 140px) minmax(130px, 150px) minmax(130px, 150px) minmax(110px, 140px) auto;
+        }
+
+        .table-toolbar.salary-toolbar {
+            grid-template-columns: minmax(130px, 190px) minmax(120px, 150px) minmax(110px, 140px) auto auto auto;
+        }
+
         .table-summary {
             color: var(--muted);
             font-size: 13px;
@@ -618,6 +664,10 @@
             gap: 18px;
         }
 
+        .statistics-panel-wide {
+            grid-column: 1 / -1;
+        }
+
         .chart {
             display: grid;
             gap: 12px;
@@ -677,7 +727,7 @@
         }
 
         .modal {
-            width: min(420px, 100%);
+            width: min(560px, 100%);
             border: 1px solid var(--line);
             border-radius: 22px;
             padding: 24px;
@@ -695,6 +745,32 @@
             margin: 12px 0 0;
             color: var(--muted);
             line-height: 1.6;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .detail-grid div {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 10px;
+            background: var(--panel-soft);
+            font-size: 13px;
+        }
+
+        .detail-grid span {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+        }
+
+        .preview-field input[readonly] {
+            color: var(--brand-dark);
+            background: #eef8f3;
         }
 
         .toast-stack {
@@ -1608,6 +1684,27 @@
             <div class="metric"><span>岗位数量</span><strong id="metricPositions">0</strong></div>
             <div class="metric"><span>员工数量</span><strong id="metricEmployees">0</strong></div>
             <div class="metric"><span>考勤记录</span><strong id="metricAttendance">0</strong></div>
+            <div class="metric"><span>在职人数</span><strong id="metricActiveEmployees">0</strong></div>
+            <div class="metric"><span>试用期人数</span><strong id="metricProbationEmployees">0</strong></div>
+            <div class="metric"><span>本月异常考勤</span><strong id="metricAttendanceIssues">0</strong></div>
+            <div class="metric"><span>本月薪资总额</span><strong id="metricSalaryTotal">0</strong></div>
+        </section>
+
+        <section class="dashboard-detail">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>部门人数排行</h3>
+                    <button class="secondary" type="button" data-action="refresh-all">刷新</button>
+                </div>
+                <div class="compact-list" id="departmentRankingList"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>本月考勤异常</h3>
+                    <button class="secondary" type="button" data-action="open-statistics">查看统计</button>
+                </div>
+                <div class="compact-list" id="attendanceIssueList"></div>
+            </div>
         </section>
 
         <div id="sections"></div>
@@ -1628,6 +1725,27 @@
     </div>
 </div>
 
+<div class="modal-backdrop" id="detailModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle">
+        <h3 id="detailModalTitle">员工详情</h3>
+        <div id="detailModalBody" class="detail-grid"></div>
+        <div class="actions">
+            <button class="secondary" type="button" id="closeDetailButton">关闭</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="resignModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="resignModalTitle">
+        <h3 id="resignModalTitle">离职登记</h3>
+        <label>离职日期<input type="date" id="resignDateInput" required></label>
+        <div class="actions">
+            <button class="danger" type="button" id="confirmResignButton">确认离职</button>
+            <button class="secondary" type="button" id="cancelResignButton">取消</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const state = {
         activeModule: 'departments',
@@ -1636,14 +1754,18 @@
         statusTimer: null,
         toastId: 0,
         pendingDelete: null,
+        pendingResignEmpId: null,
         data: {
             departments: [],
             positions: [],
             employees: [],
+            employeeOptions: [],
             attendance: [],
             salaries: [],
             statisticsByDepartment: [],
-            statisticsByPosition: []
+            statisticsByPosition: [],
+            monthlyAttendance: [],
+            dashboard: null
         }
     };
 
@@ -1697,6 +1819,8 @@
             title: '员工管理',
             desc: '维护员工基本信息和当前部门岗位。',
             endpoint: '/api/employees',
+            searchEndpoint: '/api/employees/search',
+            serverPaging: true,
             idField: 'empId',
             fields: [
                 {name: 'empName', label: '员工姓名', required: true},
@@ -1728,6 +1852,8 @@
             title: '考勤管理',
             desc: '登记员工每日出勤、迟到、请假和缺勤。',
             endpoint: '/api/attendance',
+            searchEndpoint: '/api/attendance/search',
+            serverPaging: true,
             idField: 'attendanceId',
             fields: [
                 {name: 'empId', label: '员工', type: 'employee', required: true},
@@ -1752,14 +1878,16 @@
             title: '薪资管理',
             desc: '维护员工月度薪资、奖金和扣款。',
             endpoint: '/api/salaries',
+            searchEndpoint: '/api/salaries/search',
+            serverPaging: true,
             idField: 'salaryId',
             fields: [
                 {name: 'empId', label: '员工', type: 'employee', required: true},
                 {name: 'salaryMonth', label: '薪资月份', placeholder: '2026-05', required: true},
-                {name: 'baseSalary', label: '基础工资', type: 'number', step: '0.01', required: true},
+                {name: 'baseSalary', label: '基础工资', type: 'number', step: '0.01', readonly: true},
                 {name: 'bonus', label: '奖金', type: 'number', step: '0.01'},
                 {name: 'deduction', label: '扣款', type: 'number', step: '0.01'},
-                {name: 'netSalary', label: '实发工资', type: 'number', step: '0.01', required: true}
+                {name: 'netSalary', label: '实发工资', type: 'number', step: '0.01', readonly: true}
             ],
             columns: [
                 {name: 'salaryId', label: 'ID'},
@@ -1794,6 +1922,18 @@
 
     const PAGE_SIZES = [5, 10, 20, 50];
     const DEFAULT_STATUS = '等待操作';
+    const DEFAULT_MONTH = currentMonth();
+    const TODAY = currentDate();
+
+    function currentMonth() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function currentDate() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
 
     function escapeHtml(value) {
         return String(value ?? '')
@@ -1887,7 +2027,8 @@
     }
 
     function findName(collection, idField, nameField, id) {
-        const row = state.data[collection].find(item => Number(item[idField]) === Number(id));
+        const source = collection === 'employees' ? state.data.employeeOptions : state.data[collection];
+        const row = source.find(item => Number(item[idField]) === Number(id));
         return row ? row[nameField] : id;
     }
 
@@ -1901,7 +2042,16 @@
                 search: '',
                 column: 'all',
                 page: 1,
-                pageSize: 10
+                pageSize: 10,
+                deptId: '',
+                positionId: '',
+                status: '',
+                empId: '',
+                month: moduleKey === 'salaries' ? DEFAULT_MONTH : '',
+                startDate: '',
+                endDate: '',
+                total: 0,
+                totalPages: 1
             };
         }
         return state.tableState[moduleKey];
@@ -1936,10 +2086,13 @@
             form.addEventListener('submit', event => submitForm(event, module));
             form.addEventListener('invalid', event => reportInvalidField(event, module), true);
             document.getElementById(`${module.key}Cancel`).addEventListener('click', () => resetForm(module));
+            setFormDefaults(module);
             renderTable(module);
         });
         bindSectionActions();
         bindDeleteDialog();
+        bindDetailDialog();
+        bindResignDialog();
         renderStatisticsTables();
     }
 
@@ -1949,7 +2102,10 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h3>${escapeHtml(module.title)}</h3>
-                        <button class="secondary" type="button" data-action="refresh-module" data-module="${escapeAttr(module.key)}">刷新列表</button>
+                        <div class="actions" style="margin-top: 0;">
+                            ${renderCrudExportButton(module)}
+                            <button class="secondary" type="button" data-action="refresh-module" data-module="${escapeAttr(module.key)}">刷新列表</button>
+                        </div>
                     </div>
                     <div class="panel-body">
                         <form id="${escapeAttr(module.key)}Form">
@@ -1981,6 +2137,9 @@
     }
 
     function renderTableToolbar(module) {
+        if (module.serverPaging) {
+            return renderServerToolbar(module);
+        }
         const table = getTableState(module.key);
         return `
             <div class="table-toolbar" data-module="${escapeAttr(module.key)}">
@@ -1998,9 +2157,100 @@
         `;
     }
 
+    function renderCrudExportButton(module) {
+        const labels = {
+            departments: '导出CSV',
+            positions: '导出CSV',
+            employees: '导出CSV',
+            attendance: '导出CSV',
+            salaries: '导出CSV'
+        };
+        return labels[module.key]
+            ? `<button class="secondary" type="button" data-action="export-module" data-module="${escapeAttr(module.key)}">${labels[module.key]}</button>`
+            : '';
+    }
+
+    function renderServerToolbar(module) {
+        if (module.key === 'attendance') {
+            return renderAttendanceToolbar(module);
+        }
+        if (module.key === 'salaries') {
+            return renderSalaryToolbar(module);
+        }
+        return renderEmployeeToolbar(module);
+    }
+
+    function renderEmployeeToolbar(module) {
+        const table = getTableState(module.key);
+        return `
+            <div class="table-toolbar employee-toolbar" data-module="${escapeAttr(module.key)}">
+                <label class="visually-hidden" for="${escapeAttr(module.key)}Search">搜索${escapeHtml(module.title)}</label>
+                <input id="${escapeAttr(module.key)}Search" type="search" value="${escapeAttr(table.search)}" placeholder="姓名 / 手机号 / 邮箱" data-action="table-search" data-module="${escapeAttr(module.key)}">
+                <select aria-label="部门筛选" data-action="employee-filter" data-filter="deptId" data-module="${escapeAttr(module.key)}">
+                    <option value="">全部部门</option>
+                    ${state.data.departments.map(item => `<option value="${escapeAttr(item.deptId)}" ${String(table.deptId) === String(item.deptId) ? 'selected' : ''}>${escapeHtml(item.deptName)}</option>`).join('')}
+                </select>
+                <select aria-label="岗位筛选" data-action="employee-filter" data-filter="positionId" data-module="${escapeAttr(module.key)}">
+                    <option value="">全部岗位</option>
+                    ${state.data.positions.map(item => `<option value="${escapeAttr(item.positionId)}" ${String(table.positionId) === String(item.positionId) ? 'selected' : ''}>${escapeHtml(item.positionName)}</option>`).join('')}
+                </select>
+                <select aria-label="状态筛选" data-action="employee-filter" data-filter="status" data-module="${escapeAttr(module.key)}">
+                    <option value="">全部状态</option>
+                    ${Object.entries(employeeStatusLabels).map(([value, label]) => `<option value="${escapeAttr(value)}" ${table.status === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+                </select>
+                <select aria-label="每页条数" data-action="table-page-size" data-module="${escapeAttr(module.key)}">
+                    ${PAGE_SIZES.map(size => `<option value="${size}" ${table.pageSize === size ? 'selected' : ''}>每页 ${size} 条</option>`).join('')}
+                </select>
+                <span class="table-summary" id="${escapeAttr(module.key)}Summary">共 0 条</span>
+            </div>
+        `;
+    }
+
+    function renderAttendanceToolbar(module) {
+        const table = getTableState(module.key);
+        return `
+            <div class="table-toolbar attendance-toolbar" data-module="${escapeAttr(module.key)}">
+                <select aria-label="员工筛选" data-action="server-filter" data-filter="empId" data-module="${escapeAttr(module.key)}">
+                    <option value="">全部员工</option>
+                    ${state.data.employeeOptions.map(item => `<option value="${escapeAttr(item.empId)}" ${String(table.empId) === String(item.empId) ? 'selected' : ''}>${escapeHtml(item.empName)}</option>`).join('')}
+                </select>
+                <input type="month" aria-label="月份筛选" value="${escapeAttr(table.month || '')}" data-action="server-filter" data-filter="month" data-module="${escapeAttr(module.key)}">
+                <select aria-label="状态筛选" data-action="server-filter" data-filter="status" data-module="${escapeAttr(module.key)}">
+                    <option value="">全部状态</option>
+                    ${Object.entries(attendanceStatusLabels).map(([value, label]) => `<option value="${escapeAttr(value)}" ${table.status === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+                </select>
+                <input type="date" aria-label="开始日期" value="${escapeAttr(table.startDate || '')}" data-action="server-filter" data-filter="startDate" data-module="${escapeAttr(module.key)}">
+                <input type="date" aria-label="结束日期" value="${escapeAttr(table.endDate || '')}" data-action="server-filter" data-filter="endDate" data-module="${escapeAttr(module.key)}">
+                <select aria-label="每页条数" data-action="table-page-size" data-module="${escapeAttr(module.key)}">
+                    ${PAGE_SIZES.map(size => `<option value="${size}" ${table.pageSize === size ? 'selected' : ''}>每页 ${size} 条</option>`).join('')}
+                </select>
+                <span class="table-summary" id="${escapeAttr(module.key)}Summary">共 0 条</span>
+            </div>
+        `;
+    }
+
+    function renderSalaryToolbar(module) {
+        const table = getTableState(module.key);
+        return `
+            <div class="table-toolbar salary-toolbar" data-module="${escapeAttr(module.key)}">
+                <select aria-label="员工筛选" data-action="server-filter" data-filter="empId" data-module="${escapeAttr(module.key)}">
+                    <option value="">全部员工</option>
+                    ${state.data.employeeOptions.map(item => `<option value="${escapeAttr(item.empId)}" ${String(table.empId) === String(item.empId) ? 'selected' : ''}>${escapeHtml(item.empName)}</option>`).join('')}
+                </select>
+                <input type="month" aria-label="月份筛选" value="${escapeAttr(table.month || DEFAULT_MONTH)}" data-action="server-filter" data-filter="month" data-module="${escapeAttr(module.key)}">
+                <select aria-label="每页条数" data-action="table-page-size" data-module="${escapeAttr(module.key)}">
+                    ${PAGE_SIZES.map(size => `<option value="${size}" ${table.pageSize === size ? 'selected' : ''}>每页 ${size} 条</option>`).join('')}
+                </select>
+                <button class="secondary" type="button" data-action="generate-salaries" data-module="${escapeAttr(module.key)}">批量生成</button>
+                <span class="table-summary" id="${escapeAttr(module.key)}Summary">共 0 条</span>
+            </div>
+        `;
+    }
+
     function renderField(module, field) {
         const required = field.required ? 'required' : '';
         const placeholder = field.placeholder ? `placeholder="${escapeAttr(field.placeholder)}"` : '';
+        const readonly = field.readonly ? 'readonly' : '';
         let input;
 
         if (field.type === 'select') {
@@ -2024,11 +2274,12 @@
                     ${field.step ? `step="${escapeAttr(field.step)}"` : ''}
                     ${placeholder}
                     ${required}
+                    ${readonly}
                 >
             `;
         }
 
-        return `<label>${escapeHtml(field.label)}${input}</label>`;
+        return `<label class="${field.readonly ? 'preview-field' : ''}">${escapeHtml(field.label)}${input}</label>`;
     }
 
     function renderStatisticsSection() {
@@ -2037,6 +2288,7 @@
                 <div class="statistics-grid">
                     ${renderStatisticsPanel('按部门统计员工人数', 'statisticsDepartmentChart', 'statisticsDepartmentTable')}
                     ${renderStatisticsPanel('按岗位统计员工人数', 'statisticsPositionChart', 'statisticsPositionTable')}
+                    ${renderMonthlyAttendancePanel()}
                 </div>
             </section>
         `;
@@ -2078,7 +2330,7 @@
                 options += state.data.positions.map(item => `<option value="${escapeAttr(item.positionId)}">${escapeHtml(item.positionName)}</option>`).join('');
             }
             if (source === 'employees') {
-                options += state.data.employees.map(item => `<option value="${escapeAttr(item.empId)}">${escapeHtml(item.empName)}</option>`).join('');
+                options += state.data.employeeOptions.map(item => `<option value="${escapeAttr(item.empId)}">${escapeHtml(item.empName)}</option>`).join('');
             }
             select.innerHTML = options;
             select.value = value;
@@ -2092,6 +2344,9 @@
 
     function getFilteredRows(module) {
         const table = getTableState(module.key);
+        if (module.serverPaging) {
+            return state.data[module.key];
+        }
         const query = table.search.trim().toLowerCase();
         if (!query) {
             return state.data[module.key];
@@ -2113,11 +2368,12 @@
         const summary = document.getElementById(`${module.key}Summary`);
         const table = getTableState(module.key);
         const rows = getFilteredRows(module);
-        const totalPages = Math.max(Math.ceil(rows.length / table.pageSize), 1);
+        const totalCount = module.serverPaging ? table.total : rows.length;
+        const totalPages = module.serverPaging ? table.totalPages : Math.max(Math.ceil(rows.length / table.pageSize), 1);
 
         table.page = Math.min(Math.max(table.page, 1), totalPages);
         const start = (table.page - 1) * table.pageSize;
-        const pageRows = rows.slice(start, start + table.pageSize);
+        const pageRows = module.serverPaging ? rows : rows.slice(start, start + table.pageSize);
 
         tbody.innerHTML = pageRows.length ? pageRows.map(row => {
             const id = row[module.idField];
@@ -2125,22 +2381,67 @@
                 <tr>
                     ${module.columns.map(column => `<td>${escapeHtml(getCellValue(module, column, row))}</td>`).join('')}
                     <td>
-                        <div class="row-actions">
-                            <button type="button" data-action="edit-row" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">编辑</button>
-                            <button type="button" data-action="delete-row" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">删除</button>
-                        </div>
+                        ${renderRowActions(module, row, id)}
                     </td>
                 </tr>
             `;
         }).join('') : `<tr><td colspan="${module.columns.length + 1}">${state.data[module.key].length ? '没有匹配数据' : '暂无数据'}</td></tr>`;
 
-        const shownStart = rows.length ? start + 1 : 0;
-        const shownEnd = rows.length ? Math.min(start + table.pageSize, rows.length) : 0;
-        summary.textContent = `共 ${rows.length} 条，显示 ${shownStart}-${shownEnd} 条`;
+        const shownStart = totalCount ? start + 1 : 0;
+        const shownEnd = totalCount ? Math.min(start + pageRows.length, totalCount) : 0;
+        summary.textContent = `共 ${totalCount} 条，显示 ${shownStart}-${shownEnd} 条`;
         pagination.innerHTML = `
             <button type="button" data-action="table-prev" data-module="${escapeAttr(module.key)}" ${table.page <= 1 ? 'disabled' : ''}>上一页</button>
             <span>第 ${table.page} / ${totalPages} 页</span>
             <button type="button" data-action="table-next" data-module="${escapeAttr(module.key)}" ${table.page >= totalPages ? 'disabled' : ''}>下一页</button>
+        `;
+    }
+
+    function renderMonthlyAttendancePanel() {
+        return `
+            <div class="panel statistics-panel-wide">
+                <div class="panel-header">
+                    <h3>月度考勤汇总</h3>
+                    <div class="actions" style="margin-top: 0;">
+                        <input type="month" id="monthlyAttendanceMonth" value="${escapeAttr(DEFAULT_MONTH)}" data-action="monthly-attendance-month">
+                        <button class="secondary" type="button" data-action="export-monthly-attendance">导出CSV</button>
+                        <button class="secondary" type="button" data-action="refresh-statistics">刷新统计</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>员工ID</th>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>出勤</th>
+                            <th>迟到</th>
+                            <th>请假</th>
+                            <th>缺勤</th>
+                            <th>迟到分钟</th>
+                            <th>加班小时</th>
+                        </tr>
+                        </thead>
+                        <tbody id="monthlyAttendanceTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderRowActions(module, row, id) {
+        const employeeActions = module.key === 'employees' ? `
+            ${row.status === 'probation' ? `<button type="button" data-action="regularize-employee" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">转正</button>` : ''}
+            ${row.status !== 'resigned' ? `<button type="button" data-action="resign-employee" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">离职</button>` : ''}
+        ` : '';
+        return `
+            <div class="row-actions">
+                ${module.key === 'employees' ? `<button type="button" data-action="detail-employee" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">详情</button>` : ''}
+                <button type="button" data-action="edit-row" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">编辑</button>
+                ${employeeActions}
+                <button type="button" data-action="delete-row" data-module="${escapeAttr(module.key)}" data-id="${escapeAttr(id)}">删除</button>
+            </div>
         `;
     }
 
@@ -2149,10 +2450,12 @@
         const positionTable = document.getElementById('statisticsPositionTable');
         const departmentChart = document.getElementById('statisticsDepartmentChart');
         const positionChart = document.getElementById('statisticsPositionChart');
+        const monthlyAttendanceTable = document.getElementById('monthlyAttendanceTable');
         departmentTable.innerHTML = renderStatisticsRows(state.data.statisticsByDepartment);
         positionTable.innerHTML = renderStatisticsRows(state.data.statisticsByPosition);
         departmentChart.innerHTML = renderStatisticsChart(state.data.statisticsByDepartment);
         positionChart.innerHTML = renderStatisticsChart(state.data.statisticsByPosition);
+        monthlyAttendanceTable.innerHTML = renderMonthlyAttendanceRows(state.data.monthlyAttendance);
     }
 
     function renderStatisticsRows(rows) {
@@ -2185,11 +2488,52 @@
         }).join('');
     }
 
+    function renderMonthlyAttendanceRows(rows) {
+        return rows.length ? rows.map(row => `
+            <tr>
+                <td>${escapeHtml(row.empId)}</td>
+                <td>${escapeHtml(row.empName)}</td>
+                <td>${escapeHtml(row.deptName)}</td>
+                <td>${escapeHtml(row.presentDays)}</td>
+                <td>${escapeHtml(row.lateDays)}</td>
+                <td>${escapeHtml(row.leaveDays)}</td>
+                <td>${escapeHtml(row.absentDays)}</td>
+                <td>${escapeHtml(row.totalLateMinutes)}</td>
+                <td>${escapeHtml(row.totalOvertimeHours)}</td>
+            </tr>
+        `).join('') : '<tr><td colspan="9">暂无数据</td></tr>';
+    }
+
     function renderMetrics() {
         animateNumber(document.getElementById('metricDepartments'), state.data.departments.length);
         animateNumber(document.getElementById('metricPositions'), state.data.positions.length);
-        animateNumber(document.getElementById('metricEmployees'), state.data.employees.length);
-        animateNumber(document.getElementById('metricAttendance'), state.data.attendance.length);
+        animateNumber(document.getElementById('metricEmployees'), state.data.employeeOptions.length);
+        animateNumber(document.getElementById('metricAttendance'), getTableState('attendance').total || state.data.attendance.length);
+        const dashboard = state.data.dashboard || {};
+        animateNumber(document.getElementById('metricActiveEmployees'), dashboard.activeEmployees || 0);
+        animateNumber(document.getElementById('metricProbationEmployees'), dashboard.probationEmployees || 0);
+        animateNumber(document.getElementById('metricAttendanceIssues'), dashboard.monthlyAttendanceIssues || 0);
+        document.getElementById('metricSalaryTotal').textContent = formatMoney(dashboard.monthlySalaryTotal || 0);
+        renderDashboardLists();
+    }
+
+    function formatMoney(value) {
+        return Number(value || 0).toFixed(2);
+    }
+
+    function renderDashboardLists() {
+        const dashboard = state.data.dashboard || {};
+        const ranking = dashboard.departmentRanking || [];
+        const issues = dashboard.attendanceIssues || [];
+        document.getElementById('departmentRankingList').innerHTML = ranking.length ? ranking.map(row => `
+            <div class="compact-item"><strong>${escapeHtml(row.name)}</strong><span>${escapeHtml(row.employeeCount)} 人</span></div>
+        `).join('') : '<div class="compact-item"><span>暂无数据</span></div>';
+        document.getElementById('attendanceIssueList').innerHTML = issues.length ? issues.map(row => `
+            <div class="compact-item">
+                <strong>${escapeHtml(row.empName)}</strong>
+                <span>${escapeHtml(row.attendanceDate)} · ${escapeHtml(formatAttendanceStatus(row.attendanceStatus))}${row.lateMinutes ? ` · ${escapeHtml(row.lateMinutes)} 分钟` : ''}</span>
+            </div>
+        `).join('') : '<div class="compact-item"><span>暂无异常</span></div>';
     }
 
     function animateNumber(element, target) {
@@ -2297,6 +2641,9 @@
 
         state.editing[module.key] = id;
         document.getElementById(`${module.key}Submit`).textContent = '保存修改';
+        if (module.key === 'salaries') {
+            updateSalaryPreview();
+        }
         setStatus(`正在编辑 ${module.title} ID: ${id}`);
         scrollToEditForm(module);
     }
@@ -2370,13 +2717,171 @@
         form.reset();
         delete state.editing[module.key];
         document.getElementById(`${module.key}Submit`).textContent = '新增';
+        setFormDefaults(module);
+        if (module.key === 'salaries') {
+            updateSalaryPreview();
+        }
+    }
+
+    function setFormDefaults(module) {
+        const form = document.getElementById(`${module.key}Form`);
+        if (!form) {
+            return;
+        }
+        if (module.key === 'employees' && form.elements.status && !form.elements.status.value) {
+            form.elements.status.value = 'probation';
+        }
+        if (module.key === 'attendance' && form.elements.attendanceDate && !form.elements.attendanceDate.value) {
+            form.elements.attendanceDate.value = TODAY;
+        }
+        if (module.key === 'salaries' && form.elements.salaryMonth && !form.elements.salaryMonth.value) {
+            form.elements.salaryMonth.value = DEFAULT_MONTH;
+        }
+    }
+
+    function updateSalaryPreview() {
+        const form = document.getElementById('salariesForm');
+        if (!form) {
+            return;
+        }
+        const empId = Number(form.elements.empId.value);
+        const employee = state.data.employeeOptions.find(item => Number(item.empId) === empId);
+        const position = employee
+            ? state.data.positions.find(item => Number(item.positionId) === Number(employee.positionId))
+            : null;
+        const baseSalary = Number(position?.baseSalary || 0);
+        const bonus = Number(form.elements.bonus.value || 0);
+        const deduction = Number(form.elements.deduction.value || 0);
+        const netSalary = Math.max(baseSalary + bonus - deduction, 0);
+
+        form.elements.baseSalary.value = position ? baseSalary.toFixed(2) : '';
+        form.elements.netSalary.value = position ? netSalary.toFixed(2) : '';
+    }
+
+    async function regularizeEmployee(empId) {
+        try {
+            await request(`/api/employees/${encodeURIComponent(empId)}/regularize`, {method: 'PUT'});
+            setStatus('转正成功', 'success');
+            await refreshModule('employees');
+            await refreshStatistics(false);
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    async function showEmployeeDetail(empId) {
+        try {
+            const detail = await request(`/api/employees/${encodeURIComponent(empId)}/detail`);
+            const employee = detail.employee || {};
+            const department = detail.department || {};
+            const position = detail.position || {};
+            document.getElementById('detailModalBody').innerHTML = `
+                ${renderDetailItem('姓名', employee.empName)}
+                ${renderDetailItem('状态', formatEmployeeStatus(employee.status))}
+                ${renderDetailItem('手机号', employee.phone)}
+                ${renderDetailItem('邮箱', employee.email)}
+                ${renderDetailItem('入职日期', employee.hireDate)}
+                ${renderDetailItem('离职日期', employee.leaveDate || '-')}
+                ${renderDetailItem('部门', department.deptName)}
+                ${renderDetailItem('部门负责人', department.managerName)}
+                ${renderDetailItem('岗位', position.positionName)}
+                ${renderDetailItem('岗位级别', position.level)}
+                ${renderDetailItem('基础工资', position.baseSalary)}
+                ${renderDetailItem('岗位描述', position.description)}
+            `;
+            document.getElementById('detailModal').hidden = false;
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    function renderDetailItem(label, value) {
+        return `<div><span>${escapeHtml(label)}</span>${escapeHtml(value ?? '-')}</div>`;
+    }
+
+    function resignEmployee(empId) {
+        state.pendingResignEmpId = empId;
+        document.getElementById('resignDateInput').value = TODAY;
+        document.getElementById('resignModal').hidden = false;
+        document.getElementById('resignDateInput').focus();
+    }
+
+    function closeResignDialog() {
+        state.pendingResignEmpId = null;
+        document.getElementById('resignModal').hidden = true;
+    }
+
+    async function confirmResign() {
+        if (!state.pendingResignEmpId) {
+            return;
+        }
+        const empId = state.pendingResignEmpId;
+        const leaveDate = document.getElementById('resignDateInput').value;
+        try {
+            await request(`/api/employees/${encodeURIComponent(empId)}/resign`, {
+                method: 'PUT',
+                body: JSON.stringify({leaveDate})
+            });
+            closeResignDialog();
+            setStatus('离职登记成功', 'success');
+            await refreshModule('employees');
+            await refreshStatistics(false);
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    async function generateSalaries() {
+        const table = getTableState('salaries');
+        const month = table.month || DEFAULT_MONTH;
+        try {
+            const result = await request(`/api/salaries/generate?month=${encodeURIComponent(month)}`, {method: 'POST'});
+            setStatus(`生成 ${result.generatedCount} 条，跳过 ${result.skippedCount} 条`, 'success');
+            await refreshModule('salaries');
+            await refreshStatistics(false);
+        } catch (error) {
+            setStatus(error.message, 'error');
+        }
+    }
+
+    function exportModule(moduleKey) {
+        const urls = {
+            departments: '/api/export/departments.csv',
+            positions: '/api/export/positions.csv',
+            employees: '/api/export/employees.csv',
+            attendance: '/api/export/attendance.csv'
+        };
+        if (moduleKey === 'salaries') {
+            const month = getTableState('salaries').month || DEFAULT_MONTH;
+            window.location.href = `/api/export/salaries.csv?month=${encodeURIComponent(month)}`;
+            return;
+        }
+        const url = urls[moduleKey];
+        if (url) {
+            window.location.href = url;
+        }
     }
 
     async function refreshModule(key) {
         const module = getModule(key);
         try {
+            if (module.serverPaging) {
+                if (key === 'employees') {
+                    await loadEmployeeOptions();
+                }
+                await loadServerPage(module);
+                renderDependentSelects();
+                renderServerToolbarInPlace(module.key);
+                updateSalaryPreview();
+                setStatus(`${module.title}已刷新`, 'success');
+                return;
+            }
             state.data[key] = await request(module.endpoint);
             renderDependentSelects();
+            if (key === 'positions') {
+                renderAllServerToolbars();
+                updateSalaryPreview();
+            }
             renderTable(module);
             renderMetrics();
             setStatus(`${module.title}已刷新`, 'success');
@@ -2385,14 +2890,86 @@
         }
     }
 
+    async function refreshEmployees() {
+        await Promise.all([
+            loadEmployeeOptions(),
+            loadServerPage(getModule('employees'))
+        ]);
+        renderDependentSelects();
+        renderAllServerToolbars();
+        renderMetrics();
+        updateSalaryPreview();
+    }
+
+    async function loadEmployeeOptions() {
+        state.data.employeeOptions = await request('/api/employees');
+    }
+
+    async function loadServerPage(module) {
+        const table = getTableState(module.key);
+        const params = new URLSearchParams();
+        if (module.key === 'employees' && table.search.trim()) {
+            params.set('keyword', table.search.trim());
+        }
+        if (module.key === 'employees' && table.deptId) {
+            params.set('deptId', table.deptId);
+        }
+        if (module.key === 'employees' && table.positionId) {
+            params.set('positionId', table.positionId);
+        }
+        if ((module.key === 'employees' || module.key === 'attendance') && table.status) {
+            params.set('status', table.status);
+        }
+        if ((module.key === 'attendance' || module.key === 'salaries') && table.empId) {
+            params.set('empId', table.empId);
+        }
+        if ((module.key === 'attendance' || module.key === 'salaries') && table.month) {
+            params.set('month', table.month);
+        }
+        if (module.key === 'attendance' && table.startDate) {
+            params.set('startDate', table.startDate);
+        }
+        if (module.key === 'attendance' && table.endDate) {
+            params.set('endDate', table.endDate);
+        }
+        params.set('page', table.page);
+        params.set('pageSize', table.pageSize);
+
+        const pageData = await request(`${module.searchEndpoint}?${params.toString()}`);
+        state.data[module.key] = pageData.records || [];
+        table.total = Number(pageData.total) || 0;
+        table.page = Number(pageData.page) || 1;
+        table.pageSize = Number(pageData.pageSize) || table.pageSize;
+        table.totalPages = Number(pageData.totalPages) || 1;
+        renderTable(module);
+    }
+
+    function renderServerToolbarInPlace(moduleKey) {
+        const module = getModule(moduleKey);
+        const toolbar = document.querySelector(`.table-toolbar[data-module="${moduleKey}"]`);
+        if (toolbar) {
+            toolbar.outerHTML = renderServerToolbar(module);
+        }
+    }
+
+    function renderAllServerToolbars() {
+        modules.filter(module => module.serverPaging).forEach(module => renderServerToolbarInPlace(module.key));
+    }
+
     async function loadStatisticsData() {
-        const [byDepartment, byPosition] = await Promise.all([
+        const month = document.getElementById('monthlyAttendanceMonth')?.value || DEFAULT_MONTH;
+        const [byDepartment, byPosition, monthlyAttendance, dashboard] = await Promise.all([
             request('/api/statistics/employees-by-department'),
-            request('/api/statistics/employees-by-position')
+            request('/api/statistics/employees-by-position'),
+            request(`/api/statistics/monthly-attendance?month=${encodeURIComponent(month)}`),
+            request(`/api/statistics/dashboard?month=${encodeURIComponent(month)}`)
         ]);
         state.data.statisticsByDepartment = byDepartment;
         state.data.statisticsByPosition = byPosition;
+        state.data.monthlyAttendance = monthlyAttendance;
+        state.data.dashboard = dashboard;
         renderStatisticsTables();
+        renderMetrics();
     }
 
     async function refreshStatistics(showStatus = true) {
@@ -2411,15 +2988,19 @@
         document.body.classList.add('is-loading');
         setStatus('正在加载数据......');
         try {
+            const localModules = modules.filter(module => !module.serverPaging);
             const [moduleResults] = await Promise.all([
-                Promise.all(modules.map(module => request(module.endpoint))),
+                Promise.all(localModules.map(module => request(module.endpoint))),
                 loadStatisticsData()
             ]);
-            modules.forEach((module, index) => {
+            localModules.forEach((module, index) => {
                 state.data[module.key] = moduleResults[index];
             });
+            await refreshEmployees();
+            await Promise.all(modules.filter(module => module.serverPaging && module.key !== 'employees').map(loadServerPage));
             renderDependentSelects();
-            modules.forEach(renderTable);
+            renderAllServerToolbars();
+            localModules.forEach(renderTable);
             renderMetrics();
             setStatus('数据加载完成', 'success');
         } catch (error) {
@@ -2432,6 +3013,9 @@
     function bindSectionActions() {
         const container = document.getElementById('sections');
         container.addEventListener('input', event => {
+            if (event.target.closest('#salariesForm')) {
+                updateSalaryPreview();
+            }
             if (event.target.dataset.action !== 'table-search') {
                 return;
             }
@@ -2439,16 +3023,41 @@
             const table = getTableState(module.key);
             table.search = event.target.value;
             table.page = 1;
+            if (module.serverPaging) {
+                loadServerPage(module).catch(error => setStatus(error.message, 'error'));
+                return;
+            }
             renderTable(module);
         });
 
         container.addEventListener('change', event => {
             const action = event.target.dataset.action;
+            if (event.target.closest('#salariesForm')) {
+                updateSalaryPreview();
+            }
+            if (action === 'monthly-attendance-month') {
+                refreshStatistics().catch(() => {});
+                return;
+            }
             const module = getModule(event.target.dataset.module);
             if (!module) {
                 return;
             }
             const table = getTableState(module.key);
+            if (action === 'employee-filter' || action === 'server-filter') {
+                table[event.target.dataset.filter] = event.target.value;
+                table.page = 1;
+                if (event.target.dataset.filter === 'month' && module.key === 'attendance' && event.target.value) {
+                    table.startDate = '';
+                    table.endDate = '';
+                }
+                if ((event.target.dataset.filter === 'startDate' || event.target.dataset.filter === 'endDate') && module.key === 'attendance' && event.target.value) {
+                    table.month = '';
+                    renderServerToolbarInPlace(module.key);
+                }
+                loadServerPage(module).catch(error => setStatus(error.message, 'error'));
+                return;
+            }
             if (action === 'table-column') {
                 table.column = event.target.value;
                 table.page = 1;
@@ -2457,6 +3066,10 @@
             if (action === 'table-page-size') {
                 table.pageSize = Number(event.target.value);
                 table.page = 1;
+                if (module.serverPaging) {
+                    loadServerPage(module).catch(error => setStatus(error.message, 'error'));
+                    return;
+                }
                 renderTable(module);
             }
         });
@@ -2473,21 +3086,45 @@
                 refreshStatistics().catch(() => {});
                 return;
             }
+            if (action === 'export-monthly-attendance') {
+                const month = document.getElementById('monthlyAttendanceMonth')?.value || DEFAULT_MONTH;
+                window.location.href = `/api/export/monthly-attendance.csv?month=${encodeURIComponent(month)}`;
+                return;
+            }
             if (!module) {
                 return;
             }
             if (action === 'refresh-module') {
                 refreshModule(module.key);
             }
+            if (action === 'export-module') {
+                exportModule(module.key);
+            }
             if (action === 'edit-row') {
                 editRow(module.key, button.dataset.id);
+            }
+            if (action === 'detail-employee') {
+                showEmployeeDetail(button.dataset.id);
             }
             if (action === 'delete-row') {
                 deleteRow(module.key, button.dataset.id);
             }
+            if (action === 'generate-salaries') {
+                generateSalaries();
+            }
+            if (action === 'regularize-employee') {
+                regularizeEmployee(button.dataset.id);
+            }
+            if (action === 'resign-employee') {
+                resignEmployee(button.dataset.id);
+            }
             if (action === 'table-prev' || action === 'table-next') {
                 const table = getTableState(module.key);
                 table.page += action === 'table-prev' ? -1 : 1;
+                if (module.serverPaging) {
+                    loadServerPage(module).catch(error => setStatus(error.message, 'error'));
+                    return;
+                }
                 renderTable(module);
             }
         });
@@ -2504,6 +3141,27 @@
         document.addEventListener('keydown', event => {
             if (event.key === 'Escape' && !document.getElementById('deleteModal').hidden) {
                 closeDeleteDialog();
+            }
+        });
+    }
+
+    function bindDetailDialog() {
+        document.getElementById('closeDetailButton').addEventListener('click', () => {
+            document.getElementById('detailModal').hidden = true;
+        });
+        document.getElementById('detailModal').addEventListener('click', event => {
+            if (event.target.id === 'detailModal') {
+                document.getElementById('detailModal').hidden = true;
+            }
+        });
+    }
+
+    function bindResignDialog() {
+        document.getElementById('confirmResignButton').addEventListener('click', confirmResign);
+        document.getElementById('cancelResignButton').addEventListener('click', closeResignDialog);
+        document.getElementById('resignModal').addEventListener('click', event => {
+            if (event.target.id === 'resignModal') {
+                closeResignDialog();
             }
         });
     }

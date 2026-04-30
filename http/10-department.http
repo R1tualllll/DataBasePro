@@ -9,3 +9,8 @@ Accept: application/json
   "phone": "010-8888888",
   "location": "Updated Building"
 }
+
+###
+### Export departments CSV
+GET {{baseUrl}}/api/export/departments.csv
+Accept: text/csv

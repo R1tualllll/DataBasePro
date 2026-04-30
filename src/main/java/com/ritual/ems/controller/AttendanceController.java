@@ -2,6 +2,7 @@ package com.ritual.ems.controller;
 
 import com.ritual.ems.common.Result;
 import com.ritual.ems.dto.request.AttendanceRequest;
+import com.ritual.ems.dto.response.PageResponse;
 import com.ritual.ems.model.Attendance;
 import com.ritual.ems.service.AttendanceService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,8 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -28,6 +31,17 @@ public class AttendanceController {
     @GetMapping
     public Result<List<Attendance>> getAllAttendance() {
         return Result.success(attendanceService.getAllAttendance());
+    }
+
+    @GetMapping("/search")
+    public Result<PageResponse<Attendance>> searchAttendance(@RequestParam(value = "empId", required = false) Integer empId,
+                                                             @RequestParam(value = "month", required = false) String month,
+                                                             @RequestParam(value = "status", required = false) String status,
+                                                             @RequestParam(value = "startDate", required = false) LocalDate startDate,
+                                                             @RequestParam(value = "endDate", required = false) LocalDate endDate,
+                                                             @RequestParam(value = "page", required = false) Integer page,
+                                                             @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        return Result.success(attendanceService.searchAttendance(empId, month, status, startDate, endDate, page, pageSize));
     }
 
     @PostMapping

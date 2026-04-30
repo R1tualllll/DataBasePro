@@ -3,10 +3,12 @@ package com.ritual.ems.repository;
 import com.ritual.ems.model.Department;
 import com.ritual.ems.mapper.DepartmentRowMapper;
 import com.ritual.ems.dto.request.DepartmentRequest;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class DepartmentRepository {
@@ -23,6 +25,29 @@ public class DepartmentRepository {
                 order by dept_id
                 """;
         return jdbcTemplate.query(sql, new DepartmentRowMapper());
+    }
+
+    public Optional<Department> findById(Integer deptId) {
+        String sql = """
+                select dept_id, dept_name, dept_code, manager_name, phone, location
+                from joe.department
+                where dept_id = ?
+                """;
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new DepartmentRowMapper(), deptId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public long countEmployees(Integer deptId) {
+        String sql = """
+                select count(*)
+                from joe.employee
+                where dept_id = ?
+                """;
+        Long count = jdbcTemplate.queryForObject(sql, Long.class, deptId);
+        return count == null ? 0L : count;
     }
 
     public int save(DepartmentRequest request) {
