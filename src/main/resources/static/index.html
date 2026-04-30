@@ -699,7 +699,7 @@
 
         .toast-stack {
             position: fixed;
-            top: 22px;
+            top: 76px;
             right: 22px;
             z-index: 60;
             display: grid;
@@ -1027,6 +1027,12 @@
             border-color: var(--hairline);
             background: rgba(255, 255, 255, 0.68);
             box-shadow: var(--shadow-soft), var(--inner-light);
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            z-index: 70;
+            width: auto;
+            max-width: min(360px, calc(100vw - 44px));
         }
 
         .hero-card,
@@ -1498,7 +1504,7 @@
 
         @media (max-width: 640px) {
             .content {
-                padding: 18px;
+                padding: 76px 18px 18px;
             }
 
             .topbar {
@@ -1519,7 +1525,11 @@
             }
 
             .status {
-                width: 100%;
+                top: 12px;
+                right: 12px;
+                left: 12px;
+                width: auto;
+                max-width: none;
             }
 
             .table-toolbar {
@@ -1535,7 +1545,7 @@
             }
 
             .toast-stack {
-                top: 12px;
+                top: 66px;
                 right: 12px;
                 left: 12px;
                 width: auto;
@@ -1571,7 +1581,6 @@
                 <h2 id="pageTitle">部门管理</h2>
                 <p id="pageDesc">维护企业部门主数据。</p>
             </div>
-            <div class="status" id="statusText" role="status" aria-live="polite">等待操作</div>
         </div>
 
         <section class="hero-card">
@@ -1605,6 +1614,7 @@
     </main>
 </div>
 
+<div class="status" id="statusText" role="status" aria-live="polite">等待操作</div>
 <div class="toast-stack" id="toastStack" aria-live="assertive" aria-atomic="true"></div>
 
 <div class="modal-backdrop" id="deleteModal" hidden>
